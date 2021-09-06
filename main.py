@@ -381,16 +381,3 @@ if Level == 1.1:
 		    
 		    pickle.dump(Level, open("Save.dat", "wb"))
 		  
-
-#second Level part 3
-if Level == 1.2:
-  print ("you walk through the door\n")
-  
-  print("infront of you is a goblin!\n")
-  
-  print("Fight or die thats your choice")
-  
-  computer_health = 100
-  
-  while Level == 1.2:
-    fl.playermove()
