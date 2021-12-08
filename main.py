@@ -1,7 +1,7 @@
 import time as t
 
 def start():
- 
+
   #beginning text for the player
   print('\n Suddenly you wake into a dark cave. its pitch black but you begin to feel your way around the room ')
   t.sleep(3)
