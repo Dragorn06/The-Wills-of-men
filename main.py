@@ -1,6 +1,6 @@
 import time as t
 from os import system, name
-  
+
 def clear():
   
     # for windows
@@ -42,7 +42,7 @@ def start():
     t.sleep(5)
     abandoned_forge()
 
-#player death condition   
+#player death condition
   else:
     game_over('you died of boredom') # so did I
 
