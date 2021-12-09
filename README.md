@@ -6,7 +6,7 @@ Features include:
 *   unexplained and overcomplicated rooms
 *   ~~flesh hungry demons~~
 
-1 Lore
+## Lore
 *   Become the unamed protagonist
 *   hunt throughout the world for something
 
