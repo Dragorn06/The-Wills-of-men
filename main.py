@@ -1,16 +1,35 @@
 import time as t
-from os import system, name
+from func import clear
+import sys
 
-def clear():
+#the homescreen the palyer is presented with
+def homescreen():
 
-    # for windows
-    if name == 'nt':
-        _ = system('cls')
 
-    # for mac and linux
-    else:
-        _ = system('clear')
-  
+  print('------------------')
+  print(' The Wills of Men')
+  print('------------------')
+
+  start_text = ('\nType start to begin your adventure\n')
+
+  for char in start_text:
+    sys.stdout.write(char)
+    sys.stdout.flush()
+    t.sleep(0.08)
+
+# recives and converts answer to lower case
+  answer = input(">").lower()
+
+  if 'start' in answer:
+
+    print('It Begins')
+
+    t.sleep(4)
+
+    clear()
+    
+    start()
+
 #starting function
 def start():
   
@@ -52,7 +71,7 @@ def lake_room():
   clear()
   #room's title
   print('LAKE OF DREAMS')
-  print('\nYou walk into a dimly lit room. in the center is a glowing blue lake ')
+  print('\nYou walk into a dimly lit room. in the center is a glowing blue lake which does not appear to relfect the cave. On the wall the is an unlit note with something behind it ')
 
 #room 3's function
 def abandoned_forge():
@@ -70,5 +89,5 @@ def game_over(reason):
   t.sleep(1)
   print('\nGAME OVER')
 
-#begins it all (calls start function)
-start()
+#begins it all (calls homescreen function)
+homescreen()
