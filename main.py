@@ -1,13 +1,14 @@
 import time as t
 from func import clear
 import sys
+from colorama import Fore as f
+from colorama import  Style as s
 
 #the homescreen the palyer is presented with
 def homescreen():
 
-
   print('------------------')
-  print(' The Wills of Men')
+  print(f.RED +' The Wills of Men'+ s.RESET_ALL )
   print('------------------')
 
   start_text = ('\nType start to begin your adventure\n')
