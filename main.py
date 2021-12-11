@@ -48,7 +48,7 @@ def homescreen():
     start()
 
   elif 'help' in answer:
-    print(command_list) 
+    print(command_list)
 
   elif 'load' in answer:
     try:
