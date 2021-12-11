@@ -152,7 +152,7 @@ def quit():
     print('saving and exiting')
     save()
   elif 'n' in answer:
-    print('ok if you say so')
+   print('ok if you say so')
 
 def go_back():
   if data['Room'] == 1:
