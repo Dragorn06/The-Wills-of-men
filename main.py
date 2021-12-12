@@ -14,7 +14,9 @@ def homescreen():
     'Room' : 0,
     'fe1'  : 1,
     'fe2'  : 1,
-    'fe3'  : 1
+    'fe3'  : 1,
+    'torch': 0,
+    'Coal_bucket': 0 
   }
 
   command_list = ('save - saves the game\n quit - quits the game\n go back - takes you to the previous room you were in')
@@ -31,12 +33,12 @@ def homescreen():
     t.sleep(0.08)
 
 # recives and converts answer to lower case
-  answer = input(">").lower()
+  answer = input("\n>").lower()
 
   if 'start' in answer:
 
     #creates save data
-    with open('save.txt', 'w') as save:
+    with open('save.json', 'w') as save:
       json.dump(data, save)
 
     print('\nIt Begins')
@@ -48,33 +50,31 @@ def homescreen():
     start()
 
   elif 'help' in answer:
-    print(command_list)
+    print(command_list) 
 
   elif 'load' in answer:
     try:
-      with open('save.txt') as save:
+      with open('save.json') as save:
         data = json.load(save)
     except:
       print(' no previous save ')
     Room_Check()
-    
-
-    
+         
 # starting function
 def start():
 
   clear()
 
   data['Room'] = 1
-
+  
   # beginning text for the player
   print(f.GREEN +'DARK ROOM'+ s.RESET_ALL)
   if data['fe1'] == 1:
 
     data['fe1'] = 0
 
-    save()
-
+    with open('save.json', 'w') as save:
+      json.dump(data, save)
 
     t.sleep(1)
     print('\n Suddenly you wake into a dark cave. its pitch black but you begin to feel your way around the room ')
@@ -82,10 +82,10 @@ def start():
     print(' you find two doors one to the left one to the right')
     
   t.sleep(1)
-  print('\n l for left r for right or look to explore some more\n')
+  print('\n l for left r for right or look to explore some more')
 
   # recives and converts answer to lower case
-  answer = input(">").lower()
+  answer = input("\n>").lower()
 
 # sends the player left
   if 'l' in answer:
@@ -101,8 +101,13 @@ def start():
     t.sleep(3)
     abandoned_forge()
 
+  elif 'go back' in answer:
+    go_back()
+
   elif 'save' in answer:
-    save()
+    with open('save.json', 'w') as save:
+      json.dump(data, save)
+
 
   elif 'quit' in answer:
     quit()
@@ -114,19 +119,52 @@ def start():
 # room 2's function
 def lake_room():
 
+  data['Room'] = 2
+
   # clears page for new room
   clear()
 
   # room's title
   print('LAKE OF DREAMS')
-  print('\nYou walk into a dimly lit room. in the center is a glowing blue lake which does not appear to relfect the cave. On the wall there is an unlit Torch with something behind it ')
+  print('\nYou walk into a dimly lit room. in the center is a glowing blue lake which does not appear to relfect the cave. On the wall there is an lit Torch with something behind it ')
+
+  answer = input('\n>')
+
+  if 'torch' in answer:
+    if data['torch'] == 0:
+
+       data['orch'] = 1
+       print('You grab the torch, as it comes away from the wall something drops on the floor')
+    
+    else: 
+      game_over('stupid')
+
+    answer = input('\n>')
+  
+  elif 'go back' in answer:
+    go_back()
+
+  elif 'save' in answer:
+    with open('save.json', 'w') as save:
+      json.dump(data, save)
+
+
+  elif 'quit' in answer:
+    quit()
+
+# player death condition
 
 # room 3's function
 def abandoned_forge():
+
+  data['Room'] = 3
+
   # clears page for neew room
   clear()
+
   # rooms title
   print('ABANDONED FORGE')
+
   # room outline for player
   print('\nYou walk into a new room. It appears to be an old forge with old will forging equipment and an anvil. there is a thin been of light coming into the room from a man made hole in the ceiling. in the corner there is a barrel of coal')
 
@@ -137,12 +175,6 @@ def game_over(reason):
   t.sleep(1)
   print('\nGAME OVER')
 
-def save():
-  with open('save.txt', 'w') as save:
-      json.dump(data, save)
-
-      Room_Check()
-
 def quit():
   print ('do you want to save before quitting? y/n')
 
@@ -150,16 +182,21 @@ def quit():
 
   if 'y' in answer:
     print('saving and exiting')
-    save()
+    with open('save.json', 'w') as save:
+      json.dump(data, save)
+    
   elif 'n' in answer:
-   print('ok if you say so')
+    print('ok if you say so')
 
 def go_back():
   if data['Room'] == 1:
     print('no')
+    start
   if data['Room'] == 2:
+    print('the dark room')
     start()
   if data['Room'] == 3:
+    print('the dark room')
     start()
 
 

@@ -1,4 +1,6 @@
 from os import system, name
+import json
+
 
 def clear():
 
