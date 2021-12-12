@@ -1,4 +1,4 @@
-# Text-adventure 
+# The Wills of Men
 a basic text based game that I am working on.
 
 Features include:
