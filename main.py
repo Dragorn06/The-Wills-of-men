@@ -16,7 +16,7 @@ def homescreen():
     'fe2'  : 1,
     'fe3'  : 1,
     'torch': 0,
-    'Coal_bucket': 0 
+    'Coal_bucket': 0
   }
 
   command_list = ('save - saves the game\n quit - quits the game\n go back - takes you to the previous room you were in')
@@ -50,7 +50,7 @@ def homescreen():
     start()
 
   elif 'help' in answer:
-    print(command_list) 
+    print(command_list)
 
   elif 'load' in answer:
     try:
@@ -136,7 +136,7 @@ def lake_room():
        data['orch'] = 1
        print('You grab the torch, as it comes away from the wall something drops on the floor')
     
-    else: 
+    else:
       game_over('stupid')
 
     answer = input('\n>')
@@ -191,7 +191,7 @@ def quit():
 def go_back():
   if data['Room'] == 1:
     print('no')
-    start
+    start()
   if data['Room'] == 2:
     print('the dark room')
     start()
