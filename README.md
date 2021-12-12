@@ -4,11 +4,12 @@ a basic text based game that I am working on.
 Features include:
 *   steep difficulty curves
 *   unexplained and overcomplicated rooms
+*   a story driven experience ( eventualy )
 *   ~~flesh hungry demons~~
 
 ## Lore
 *   Become the unamed protagonist
-*   hunt throughout the world for something
+*   hunt throughout the world for the great will
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ac5ad7e0b0ca4e99be484226fccace1e)](https://app.codacy.com/gh/Dragorn06/Text-adventure?utm_source=github.com&utm_medium=referral&utm_content=Dragorn06/Text-adventure&utm_campaign=Badge_Grade)
 
