@@ -16,7 +16,7 @@ def homescreen():
     'fe2'  : 1,
     'fe3'  : 1,
     'torch': 0,
-    'Coal_bucket': 0
+    'coal_bucket': 0
   }
 
   command_list = ('save - saves the game\n quit - quits the game\n go back - takes you to the previous room you were in')
@@ -133,7 +133,7 @@ def lake_room():
   if 'torch' in answer:
     if data['torch'] == 0:
 
-       data['orch'] = 1
+       data['torch'] = 1
        print('You grab the torch, as it comes away from the wall something drops on the floor')
     
     else:
@@ -167,6 +167,26 @@ def abandoned_forge():
 
   # room outline for player
   print('\nYou walk into a new room. It appears to be an old forge with old will forging equipment and an anvil. there is a thin been of light coming into the room from a man made hole in the ceiling. in the corner there is a barrel of coal')
+
+  answer = input('\n>')
+
+  if 'bucket' or 'coal' in answer:
+    if data['coal_bucket'] == 0:
+
+     data['coal_bucket'] = 1
+     print('you grab the bucket of coal')
+
+  elif 'go back' in answer:
+    go_back()
+
+  elif 'save' in answer:
+    with open('save.json', 'w') as save:
+      json.dump(data, save)
+
+
+  elif 'quit' in answer:
+    quit()
+
 
 # kills the player when triggered
 def game_over(reason):
