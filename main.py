@@ -61,8 +61,8 @@ def start():
   
   # beginning text for the player
   print(f.GREEN +'DARK ROOM'+ s.RESET_ALL)
-  if data['fe1'] == 1:
-    print(' ')
+  if data['fe1'] == 0:
+    print('your back in the dark room')
   if data['fe1'] == 1:
 
     data['fe1'] = 0
@@ -135,8 +135,13 @@ def lake_room():
   clear()
 
   # room's title
-  print('LAKE OF DREAMS')
-  print('\nYou walk into a dimly lit room. in the center is a glowing blue lake which does not appear to relfect the cave. On the wall there is an lit Torch with something behind it ')
+  print(f.GREEN +'LAKE OF DREAMS'+ s.RESET_ALL)
+
+  if data['fe2'] == 1:
+
+    t.sleep(1)
+
+    print('\nYou walk into a dimly lit room. in the center is a glowing blue lake which does not appear to relfect the cave. On the wall there is an lit Torch with something behind it ')
 
   while True:
     answer = input('\n>')
@@ -170,10 +175,14 @@ def abandoned_forge():
   clear()
 
   # rooms title
-  print('ABANDONED FORGE')
+  print(f.GREEN +'ABANDONED FORGE'+ s.RESET_ALL)
 
-  # room outline for player
-  print('\nYou walk into a new room. It appears to be an old forge with old will forging equipment and an anvil. there is a thin been of light coming into the room from a man made hole in the ceiling. in the corner there is a barrel of coal')
+  if data['fe3'] == 1:
+
+    t.sleep(1)
+
+    # room outline for player
+    print('\nYou walk into a new room. It appears to be an old forge with old will forging equipment and an anvil. there is a thin been of light coming into the room from a man made hole in the ceiling. in the corner there is a barrel of coal')
 
   while True:
     answer = input('\n>')
@@ -189,7 +198,7 @@ def abandoned_forge():
     elif 'light' or 'light forge' or 'light fire' == answer:
       if data['torch'] == 1 and data['coal_bucket'] == 1:
         t.sleep(2)
-        print ('\nAs you place the coal in the forge and light the fire you feel a great increase in your power ' + f.YELLOW +'Somewhere a door to the outside can be found'+ s.RESET_ALL, ) 
+        print ('\nAs you place the coal in the forge and light the fire you feel a great increase in your power ' + f.YELLOW +'Somewhere a door to the outside can be found'+ s.RESET_ALL, )
 
         t.sleep(1)
 
