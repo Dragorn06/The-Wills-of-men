@@ -1,7 +1,7 @@
 import json
 from os import system, name
 
-# all possible save data 
+# all possible save data
 data = {
     'Room' : 0,
     'fe1'  : 1,

@@ -41,7 +41,7 @@ def homescreen():
     t.sleep(4)
 
     clear()
-    
+
     #begins Room 1
     start()
 
@@ -51,7 +51,7 @@ def homescreen():
 
   #checks for load command
   elif 'load' in answer:
-    #trys to load a save 
+    #trys to load a save
     try:
       with open('save.json') as save:
         data = json.load(save)
@@ -74,7 +74,7 @@ def start():
   if data['fe1'] == 0:
     print("\nyou're back in the dark room")
   
-  #checks if this is your first entry 
+  #checks if this is your first entry
   if data['fe1'] == 1:
 
     data['fe1'] = 0
@@ -121,7 +121,7 @@ def start():
 
     #check for the open door command
     elif 'open door' ==  answer:
-      #check if the playere has found the door and has the key 
+      #check if the playere has found the door and has the key
       if  data['has_key'] == 1 and data['door_found'] == 1:
         print('The door flies open and you are blinded by the light of the outside world')
 
