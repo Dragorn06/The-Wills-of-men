@@ -35,7 +35,9 @@ def quit():
     print('saving and exiting')
     with open('save.json', 'w') as save:
       json.dump(data, save)
+      exit()
 
   #if n just quits
   elif 'n' in answer:
     print('ok if you say so')
+    exit()
