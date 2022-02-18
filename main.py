@@ -1,12 +1,12 @@
 import sys
 import json
 import time as t
-from functions import clear, data, quit
+from functions import clear,data , quit1
 from colorama import Fore as f
 from colorama import Style as s
 
 
-# the homescreen the palyer is presented with
+# the homescreen the player is presented with
 def homescreen():
     # tells us the the player is in room 0
     global data
@@ -54,7 +54,7 @@ def homescreen():
 
     # checks for load command
     elif 'load' in answer:
-        # trys to load a save
+        # tries to load a save
         try:
             with open('save.json') as save:
                 data = json.load(save)
@@ -143,7 +143,7 @@ def start():
 
         # sends player to quit function
         elif 'quit' in answer:
-            quit()
+            quit1()
 
         # player death condition
         else:
@@ -201,7 +201,7 @@ def lake_room():
 
         # quits the game
         elif 'quit' in answer:
-            quit()
+            quit1()
 
 
 # room 3's function
@@ -279,7 +279,7 @@ def abandoned_forge():
 
         # quits the game
         elif 'quit' in answer:
-            quit()
+            quit1()
 
 
 # kills the player when triggered
