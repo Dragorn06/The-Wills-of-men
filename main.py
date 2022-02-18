@@ -24,7 +24,7 @@ def homescreen():
   for char in start_text:
     sys.stdout.write(char)
     sys.stdout.flush()
-    #t.sleep(0.08)
+    t.sleep(0.08)
 
 # recives and converts answer to lower case
   answer = input("\n>").lower()
