@@ -1,7 +1,7 @@
 import sys
 import json
 import time as t
-from functions import clear,data , quit1
+from functions import *
 from colorama import Fore as f
 from colorama import Style as s
 
