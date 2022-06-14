@@ -2,10 +2,8 @@ import sys
 import json
 import time as t
 from functions import *
-#from functions import data
 from colorama import Fore as f
 from colorama import Style as s
-
 
 # the homescreen the player is presented with
 def homescreen():
@@ -95,58 +93,7 @@ def start():
     # Room 1 game loop
     while True:
 
-        # recives and converts answer to lower case
-        answer = input("\n>").lower()
-
-        # sends the player left
-        if 'l' == answer:
-            clear()
-            print('you go left')
-            t.sleep(3)
-            lake_room()
-
-        # sends the player right
-        elif 'r' == answer:
-            clear()
-            print('you go right')
-            t.sleep(3)
-            abandoned_forge()
-
-        # the player explore the area
-        elif 'look' == answer:
-            # if they have a torch they find something
-            if data['torch'] == 1:
-                print('\n you look around and find what appears to be another door in the wall')
-                data['door_found'] = 1
-
-        # check for the open door command
-        elif 'open door' == answer:
-            # check if the playere has found the door and has the key
-            if data['has_key'] == 1 and data['door_found'] == 1:
-                print('The door flies open and you are blinded by the light of the outside world')
-
-                t.sleep(2)
-
-                print("You've finished 0.0.2 of The Wills of Men. Thank you for playing!! ")
-
-                with open('save.json', 'w') as save:
-                    json.dump(data, save)
-                break
-
-        # saves the game
-        elif 'save' in answer:
-            with open('save.json', 'w') as save:
-                json.dump(data, save)
-                print('Saved!')
-
-        # sends player to quit function
-        elif 'quit' in answer:
-            quit1()
-
-        # player death condition
-        else:
-            game_over('you died of boredom')  # so did I
-
+        command_handler()
 
 # room 2's function
 def lake_room():
@@ -176,31 +123,8 @@ def lake_room():
 
     # room game loop
     while True:
-        answer = input('\n>').lower()
 
-        # check for torch command
-        if 'torch' in answer:
-
-            # checks torch status
-            if data['torch'] == 0:
-                # changes torch status
-                data['torch'] = 1
-                print('You grab the torch, as it comes away from the wall something drops on the floor')
-
-        # sends the player to the previous room
-        elif 'go back' in answer:
-            go_back()
-
-        # saves the game
-        elif 'save' in answer:
-            with open('save.json', 'w') as save:
-                json.dump(data, save)
-                print('Saved!')
-
-        # quits the game
-        elif 'quit' in answer:
-            quit1()
-
+      command_handler()
 
 # room 3's function
 def abandoned_forge():
@@ -228,57 +152,8 @@ def abandoned_forge():
 
     # Room 3 game loop
     while True:
-        answer = input('\n>').lower()
 
-        # sends the player to the previous room
-        if 'go back' == answer:
-            go_back()
-
-        # saves the game
-        elif 'save' == answer:
-            with open('save.json', 'w') as save:
-                json.dump(data, save)
-                print('Saved!')
-
-        # checks if the player wants to get the coal bucket
-        elif 'get coal bucket' == answer:
-            if data['coal_bucket'] == 0:
-                data['coal_bucket'] = 1
-                print('you grab the bucket of coal')
-
-        # checks the player wants to light the forge
-        elif 'light' or 'light forge' or 'light fire' == answer:
-            if data['torch'] == 1 and data['coal_bucket'] == 1:
-                t.sleep(2)
-                print(
-                    '\nAs you place the coal in the forge and light the fire you feel a great increase in your power ' + f.YELLOW + 'Somewhere a door to the outside can be found' + s.RESET_ALL, )
-
-                t.sleep(1)
-
-                print('\na key materialises on the anvil')
-
-                t.sleep(1)
-
-                print('\n do you want to pick it up y/n')
-
-                answer = input('\n>')
-
-                # check the player want the key
-                if 'y' in answer:
-                    data['has_key'] = 1
-                    print('you get the key from the anvil.')
-                    print(
-                        '\n on it there is an inscription .' + f.RED +
-                        '"The way to light is found in the darkest places"' + s.RESET_ALL)
-
-                # the player says no (why would you)
-                elif 'n' in answer:
-                    print('ok')
-
-        # quits the game
-        elif 'quit' in answer:
-            quit1()
-
+      command_handler()
 
 # kills the player when triggered
 def game_over(reason):
@@ -286,7 +161,6 @@ def game_over(reason):
     print(reason)
     t.sleep(1)
     print('\nGAME OVER')
-
 
 # send the player to the previous room
 def go_back():
@@ -317,5 +191,136 @@ def Room_Check():
 
 
 # begins it all (calls home screen function)
+def command_handler():
+  
+        # recives and converts answer to lower case
+        answer = input("\n>").lower()
+
+        if data["Room"] == 1:
+          # sends the player left
+          if 'l' == answer:
+            clear()
+            print('you go left')
+            t.sleep(3)
+            lake_room()
+
+          # sends the player right
+          elif 'r' == answer:
+                clear()
+                print('you go right')
+                t.sleep(3)
+                abandoned_forge()
+
+          # the player explore the area
+          elif 'look' == answer:
+              # if they have a torch they find something
+              if data['torch'] == 1:
+                print('\n you look around and find what appears to be another door in the wall')
+                data['door_found'] = 1
+
+          # check for the open door command
+          elif 'open door' == answer:
+              # check if the playere has found the door and has the key
+              if data['has_key'] == 1 and data['door_found'] == 1:
+                  print('The door flies open and you are blinded by the light of the outside world')
+
+                  t.sleep(2)
+
+                  print("You've finished 0.2.0 of The Wills of Men. Thank you for playing!! ")
+
+                  with open('save.json', 'w') as save:
+                      json.dump(data, save)
+                  quit()
+
+          # saves the game
+          elif 'save' in answer:
+            with open('save.json', 'w') as save:
+              json.dump(data, save)
+              print('Saved!')
+
+          # sends player to quit function
+          elif 'quit' in answer:
+            quit1()
+
+
+
+
+  
+        if data["Room"] == 2:
+          # check for torch command
+          if 'torch' in answer:
+
+            # checks torch status
+            if data['torch'] == 0:
+                # changes torch status
+                data['torch'] = 1
+                print('You grab the torch, as it comes away from the wall something drops on the floor')
+
+          # sends the player to the previous room
+          elif 'go back' in answer:
+              go_back()
+
+          # saves the game
+          elif 'save' in answer:
+              with open('save.json', 'w') as save:
+                  json.dump(data, save)
+                  print('Saved!')
+
+          # quits the game
+          elif 'quit' in answer:
+              quit1()
+
+
+        if data["Room"] == 3:
+          print('Hi')
+          # sends the player to the previous room
+          if 'go back' == answer:
+              go_back()
+
+          # saves the game
+          elif 'save' == answer:
+              with open('save.json', 'w') as save:
+                  json.dump(data, save)
+                  print('Saved!')
+
+          # checks if the player wants to get the coal bucket
+          elif 'get coal bucket' == answer:
+              if data['coal_bucket'] == 0:
+                  data['coal_bucket'] = 1
+                  print('you grab the bucket of coal')
+
+          # checks the player wants to light the forge
+          elif 'light' or 'light forge' or 'light fire' == answer:
+              if data['torch'] == 1 and data['coal_bucket'] == 1:
+                  t.sleep(2)
+                  print(
+                    '\nAs you place the coal in the forge and light the fire you feel a great increase in your power ' + f.YELLOW + 'Somewhere a door to the outside can be found' + s.RESET_ALL, )
+
+                  t.sleep(1)
+
+                  print('\na key materialises on the anvil')
+
+                  t.sleep(1)
+
+                  print('\n do you want to pick it up y/n')
+
+                  answer = input('\n>').lower()
+
+                  # check the player want the key
+                  if 'y' in answer:
+                      data['has_key'] = 1
+                      print('you get the key from the anvil.')
+                      print(
+                        '\n on it there is an inscription .' + f.RED +
+                        '"The way to light is found in the darkest places"' + s.RESET_ALL)
+
+                  # the player says no (why would you)
+                  elif 'n' in answer:
+                      print('ok')
+
+          # quits the game
+          elif 'quit' in answer:
+            quit1()
+
 if __name__ == "__main__":
   homescreen()

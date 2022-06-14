@@ -41,5 +41,3 @@ def quit1():
     elif 'n' in answer:
         print('ok if you say so')
         exit()
-
-
