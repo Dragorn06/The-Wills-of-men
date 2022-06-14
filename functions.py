@@ -13,7 +13,6 @@ data = {
     'coal_bucket': 0
 }
 
-
 # clears the screen
 def clear():
     # for windows
@@ -42,3 +41,5 @@ def quit1():
     elif 'n' in answer:
         print('ok if you say so')
         exit()
+
+

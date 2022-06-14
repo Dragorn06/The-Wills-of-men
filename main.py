@@ -2,6 +2,7 @@ import sys
 import json
 import time as t
 from functions import *
+#from functions import data
 from colorama import Fore as f
 from colorama import Style as s
 
@@ -13,7 +14,7 @@ def homescreen():
 
     # help for the player
     command_list = (
-        'save - saves the game\n quit - quits the game\n go back - takes you to the previous room you were in')
+        'save - saves the game\nquit - quits the game\ngo back - takes you to the previous room you were in')
 
     # title
     print(f.BLUE + '------------------')
@@ -27,42 +28,39 @@ def homescreen():
     for char in start_text:
         sys.stdout.write(char)
         sys.stdout.flush()
-        t.sleep(0.08)
+        t.sleep(0.03)
 
-    # recives and converts answer to lower case
-    answer = input("\n>").lower()
+    while True:
+      # recives and converts answer to lower case
+      answer = input("\n>").lower()
 
-    # checks for start command
-    if 'start' in answer:
+      # checks for start command
+      if 'start' in answer:
 
-        # creates save data
-        with open('save.json', 'w') as save:
-            json.dump(data, save)
+          # creates save data
+          with open('save.json', 'w') as save:
+              json.dump(data, save)
 
-        print('\nIt Begins')
+          print('\nIt Begins')
 
-        t.sleep(4)
+          t.sleep(4)
 
-        clear()
+          clear()
 
-        # begins Room 1
-        start()
+          # begins Room 1
+          start()
 
-    # prints command_list
-    elif 'help' in answer:
-        print(command_list)
+      # prints command_list
+      elif 'help' in answer:
+          print(command_list)
 
-    # checks for load command
-    elif 'load' in answer:
-        # tries to load a save
-        try:
-            with open('save.json') as save:
-                data = json.load(save)
-        except:
-            print('')
-            Room_Check()
-
-
+      # checks for load command
+      elif 'load' in answer:
+          # tries to load a save
+              with open('save.json') as save:
+                  data = json.load(save)
+              Room_Check()
+              
 # starting function
 def start():
     clear()
@@ -178,7 +176,7 @@ def lake_room():
 
     # room game loop
     while True:
-        answer = input('\n>')
+        answer = input('\n>').lower()
 
         # check for torch command
         if 'torch' in answer:
@@ -230,7 +228,7 @@ def abandoned_forge():
 
     # Room 3 game loop
     while True:
-        answer = input('\n>')
+        answer = input('\n>').lower()
 
         # sends the player to the previous room
         if 'go back' == answer:
@@ -319,4 +317,5 @@ def Room_Check():
 
 
 # begins it all (calls home screen function)
-homescreen()
+if __name__ == "__main__":
+  homescreen()
