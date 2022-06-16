@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "The-Wills-of-Men"
-version = "0.0.2"
-description = ""
+version = "0.3.0"
+description = "Its a game mate"
 authors = ["Dragorn06"]
 
 [tool.poetry.dependencies]
