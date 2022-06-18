@@ -17,7 +17,6 @@ data = {
     'coal_bucket': 0
 }
 
-
 # the homescreen the player is presented with
 def homescreen():
     # tells us the the player is in room 0
@@ -72,10 +71,13 @@ def homescreen():
 
             # if y saves the game and quits
             if 'y' in answer:
-                print('saving and exiting')
+                print('exiting')
                 with open('save.json', 'w') as save:
                     json.dump(data, save)
                     exit()
+
+            elif 'n' in answer:
+              exit()
 
 
 # starting function
@@ -121,7 +123,7 @@ def start():
     # Room 1 game loop
     while True:
 
-        command_handler()
+        cmd_handler()
 
 
 # room 2's function
@@ -155,7 +157,7 @@ def lake_room():
     # room game loop
     while True:
 
-        command_handler()
+        cmd_handler()
 
 
 # room 3's function
@@ -185,7 +187,7 @@ def abandoned_forge():
     # Room 3 game loop
     while True:
 
-        command_handler()
+        cmd_handler()
 
 
 # kills the player when triggered
@@ -237,7 +239,7 @@ def clear():
 
 
 # handles all commands in the game
-def command_handler():
+def cmd_handler():
 
     answer = input('\n>').lower()
 
