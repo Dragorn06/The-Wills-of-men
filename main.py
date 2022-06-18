@@ -17,6 +17,7 @@ data = {
     'coal_bucket': 0
 }
 
+
 # the homescreen the player is presented with
 def homescreen():
     # tells us the the player is in room 0
@@ -28,7 +29,7 @@ def homescreen():
     print('------------------' + s.RESET_ALL)
 
     start_text = (
-        '\nType start to begin your adventure or load to countinue your adventure. Remeber type save to save and quit '
+        '\nType start to begin your adventure or load to countinue your adventure. Remember type save to save and quit '
         'to quit at any point\n')
 
     for char in start_text:
@@ -55,7 +56,7 @@ def homescreen():
 
             # begins Room 1
             start()
-          
+
         # checks for load command
         elif 'load' in answer:
             # tries to load a save
