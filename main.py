@@ -1,3 +1,9 @@
+"""
+T H E   W I L L S   O F   M E N
+A high fantasy text adventure game
+by Dragorn06
+"""
+
 import sys
 import json
 import time as t
@@ -17,15 +23,15 @@ data = {
     'coal_bucket': 0
 }
 
-# the homescreen the player is presented with
+# the different 'rooms'
 def homescreen():
     # tells us the the player is in room 0
     global data
 
     # title
-    print(f.BLUE + '------------------')
+    print( f'{f.BLUE}------------------')
     print(' The Wills of Men')
-    print('------------------' + s.RESET_ALL)
+    print(f'------------------{s.RESET_ALL}' )
 
     start_text = (
         '\nType start to begin your adventure or load to countinue your adventure. Remember type save to save and quit '
@@ -77,7 +83,7 @@ def homescreen():
                     exit()
 
             elif 'n' in answer:
-              exit()
+                exit()
 
 
 # starting function
@@ -142,7 +148,7 @@ def lake_room():
             '\nyou re-enter the Lake of Dreams. You again see the iridescent lake'
         )
         if data['torch'] == 0:
-            print('On the wall there is an lit Torch with something behind it')
+            print('\nOn the wall there is an lit Torch with something behind it')
 
     if data['fe2'] == 1:
         data['fe2'] = 0
@@ -151,7 +157,7 @@ def lake_room():
 
         # room outline
         print(
-            '\nYou walk into a dimly lit cavern. in the center is a glowing blue lake which appears to glow. On the wall there is an lit Torch with something behind it '
+            '\nYou walk into a dimly lit cavern. in the center is a glowing blue lake. On the wall there is an lit Torch with something behind it '
         )
 
     # room game loop
@@ -191,14 +197,8 @@ def abandoned_forge():
 
 
 # kills the player when triggered
-def game_over(reason):
-    # why the player is killed
-    print(reason)
-    t.sleep(1)
-    print('\nGAME OVER')
 
-
-# send the player to the previous room
+# general cammond related functions
 def go_back():
     if data['Room'] == 1:
         print('no')
@@ -208,12 +208,10 @@ def go_back():
         start()
     if data['Room'] == 3:
         print('the dark room')
-        start()
+        start() 
 
-
-# checks what room the player should be in and sends them there
-#checks what room th eplayer is in
 def Room_Check():
+# checks what room the player should be in and sends them there
     if data['Room'] == 1:
         start()
     elif data['Room'] == 2:
@@ -279,10 +277,10 @@ def cmd_handler():
                     print('You grab the torch.')
 
         if data['Room'] == 3:
-            if 'coal barrel' in answer:
+            if 'coal' in answer:
                 if data['coal_bucket'] == 0:
                     data['coal_bucket'] = 1
-                    print('you grab the bucket of coal')
+                    print('you grab the barrel of coal')
 
             if 'key' in answer:
                 if data['has_key'] == 0:
@@ -338,7 +336,7 @@ def cmd_handler():
                 if data['torch'] == 1 and data['coal_bucket'] == 1:
                     t.sleep(2)
                     print(
-                        '\nAs you place the coal in the forge and light the fire you feel a great increase in your power '
+                        '\nAs you place the coal in the forge and light the fire with your torch you feel a great increase in your power '
                         + f.YELLOW + 'Somewhere you can feel a way outside' +
                         s.RESET_ALL, )
 
@@ -388,5 +386,7 @@ def cmd_handler():
         print(f.RED + 'Syntax error' + s.RESET_ALL)
 
 
+
+# calls the script
 if __name__ == "__main__":
     homescreen()
