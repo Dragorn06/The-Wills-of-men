@@ -23,15 +23,16 @@ data = {
     'coal_bucket': 0
 }
 
+
 # the different 'rooms'
-def homescreen():
+def home_screen():
     # tells us the the player is in room 0
     global data
 
     # title
-    print( f'{f.BLUE}------------------')
+    print(f'{f.BLUE}------------------')
     print(' The Wills of Men')
-    print(f'------------------{s.RESET_ALL}' )
+    print(f'------------------{s.RESET_ALL}')
 
     start_text = (
         '\nType start to begin your adventure or load to countinue your adventure. Remember type save to save and quit '
@@ -43,7 +44,7 @@ def homescreen():
         t.sleep(0.03)
 
     while True:
-        # recives and converts answer to lower case
+        # receives and converts answer to lower case
         answer = input("\n>").lower()
 
         # checks for start command
@@ -67,7 +68,7 @@ def homescreen():
             # tries to load a save
             with open('save.json') as save:
                 data = json.load(save)
-            Room_Check()
+            room_check()
 
         elif 'quit' in answer:
             # asks the player i they want to save
@@ -88,7 +89,6 @@ def homescreen():
 
 # starting function
 def start():
-
     clear()
 
     # tells the code we are in room 1
@@ -128,7 +128,6 @@ def start():
 
     # Room 1 game loop
     while True:
-
         cmd_handler()
 
 
@@ -157,12 +156,12 @@ def lake_room():
 
         # room outline
         print(
-            '\nYou walk into a dimly lit cavern. in the center is a glowing blue lake. On the wall there is an lit Torch with something behind it '
+            '\nYou walk into a dimly lit cavern. in the center is a glowing blue lake. On the wall there is an lit '
+            'Torch with something behind it '
         )
 
     # room game loop
     while True:
-
         cmd_handler()
 
 
@@ -192,7 +191,6 @@ def abandoned_forge():
 
     # Room 3 game loop
     while True:
-
         cmd_handler()
 
 
@@ -208,10 +206,11 @@ def go_back():
         start()
     if data['Room'] == 3:
         print('the dark room')
-        start() 
+        start()
 
-def Room_Check():
-# checks what room the player should be in and sends them there
+
+def room_check():
+    # checks what room the player should be in and sends them there
     if data['Room'] == 1:
         start()
     elif data['Room'] == 2:
@@ -238,7 +237,6 @@ def clear():
 
 # handles all commands in the game
 def cmd_handler():
-
     answer = input('\n>').lower()
 
     if 'go' in answer:
@@ -286,15 +284,13 @@ def cmd_handler():
                 if data['has_key'] == 0:
                     data['has_key'] = 1
                     print('You get the key from the anvil.')
-                    print('\nOn it there is an inscription .' + f.BLUE +
-                          '"The way to light is found in the darkest places"' +
-                          s.RESET_ALL)
+                    print(f'\nOn it there is an inscription . {f.BLUE} "The way to light is found in the darkest places"{s.RESET_ALL}')
 
     elif 'open' in answer:
 
         if data['Room'] == 1:
             if 'open door' in answer:
-                # check if the playere has found the door and has the key
+                # check if the player has found the door and has the key
                 if data['has_key'] == 1 and data['door_found'] == 1:
                     print(
                         '\nThe door flies open and you are blinded by the light of the outside world'
@@ -315,7 +311,7 @@ def cmd_handler():
 
                         clear()
 
-                    homescreen()
+                    home_screen()
 
         if data['Room'] == 2:
             print('')
@@ -335,10 +331,8 @@ def cmd_handler():
             if 'forge' or 'fire' in answer:
                 if data['torch'] == 1 and data['coal_bucket'] == 1:
                     t.sleep(2)
-                    print(
-                        '\nAs you place the coal in the forge and light the fire with your torch you feel a great increase in your power '
-                        + f.YELLOW + 'Somewhere you can feel a way outside' +
-                        s.RESET_ALL, )
+                    print(f'\nAs you place the coal in the forge and light the fire with your torch you feel a great '
+                          f'increase in your power {f.YELLOW} Somewhere you can feel a way outsides {s.RESET_ALL} ')
 
                     t.sleep(1)
 
@@ -383,10 +377,9 @@ def cmd_handler():
             exit()
 
     else:
-        print(f.RED + 'Syntax error' + s.RESET_ALL)
-
+        print(f'{f.RED} Syntax error{s.RESET_ALL}')
 
 
 # calls the script
 if __name__ == "__main__":
-    homescreen()
+    home_screen()
