@@ -7,9 +7,10 @@ by Dragorn06
 import sys
 import json
 import time as t
-from os import system, name
+import os
 from colorama import Fore as f
 from colorama import Style as s
+
 
 # all possible save data
 data = {
@@ -58,7 +59,7 @@ def home_screen():
 
             t.sleep(4)
 
-            clear()
+            os.system('clear')
 
             # begins Room 1
             start()
@@ -89,7 +90,7 @@ def home_screen():
 
 # starting function
 def start():
-    clear()
+    os.system('clear')
 
     # tells the code we are in room 1
     data['Room'] = 1
@@ -136,7 +137,7 @@ def lake_room():
     data['Room'] = 2
 
     # clears page for new room
-    clear()
+    os.system('clear')
 
     # room's title
     print(f.GREEN + 'LAKE OF DREAMS' + s.RESET_ALL)
@@ -170,7 +171,7 @@ def abandoned_forge():
     data['Room'] = 3
 
     # clears page for new room
-    clear()
+    os.system('clear')
 
     # rooms title
     print(f.GREEN + 'ABANDONED FORGE' + s.RESET_ALL)
@@ -194,9 +195,7 @@ def abandoned_forge():
         cmd_handler()
 
 
-# kills the player when triggered
-
-# general cammond related functions
+# general command related functions
 def go_back():
     if data['Room'] == 1:
         print('no')
@@ -224,17 +223,6 @@ def room_check():
         start()
 
 
-# clears the screen
-def clear():
-    # for windows
-    if name == 'nt':
-        _ = system('cls')
-
-    # for mac and linux
-    else:
-        _ = system('clear')
-
-
 # handles all commands in the game
 def cmd_handler():
     answer = input('\n>').lower()
@@ -243,12 +231,12 @@ def cmd_handler():
 
         if data['Room'] == 1:
             if 'left' in answer:
-                clear()
+                os.system('clear')
                 print('you go left')
                 t.sleep(3)
                 lake_room()
             elif 'right' in answer:
-                clear()
+                os.system('clear')
                 print('you go right')
                 t.sleep(3)
                 abandoned_forge()
@@ -284,7 +272,10 @@ def cmd_handler():
                 if data['has_key'] == 0:
                     data['has_key'] = 1
                     print('You get the key from the anvil.')
-                    print(f'\nOn it there is an inscription . {f.BLUE} "The way to light is found in the darkest places"{s.RESET_ALL}')
+                    print(
+                        f'\nOn it there is an inscription . {f.BLUE} "The way to '
+                        f'light is found in the darkest places"{s.RESET_ALL}'
+                    )
 
     elif 'open' in answer:
 
@@ -298,7 +289,7 @@ def cmd_handler():
 
                     t.sleep(10)
 
-                    clear()
+                    os.system('clear')
 
                     print(
                         "\nYou've finished 0.2.1 of The Wills of Men. Thank you for playing!! "
@@ -309,7 +300,7 @@ def cmd_handler():
                     with open('save.json', 'w') as save:
                         json.dump(data, save)
 
-                        clear()
+                        os.system('clear')
 
                     home_screen()
 
