@@ -12,22 +12,57 @@ from colorama import Fore as f
 from colorama import Style as s
 
 
+class Room:
+    default = 0
+
+    def __init__(self, num, fe):
+        self.num = num
+        self.has_entered = fe
+
+
+class Item:
+    def __init__(self, name, player_has):
+        self.name = name
+        self.player_has = player_has
+
+
+class RoomObj(Item):
+    def __init__(self, name, found):
+        super().__init__(self, name)
+        self.found = found
+
+
+# rooms
+Dark_Room = Room(1, False)
+Lake_Room = Room(2, False)
+Abandoned_Forge = Room(3, False)
+Crossroads = Room(4, False)
+
+# items
+Torch = Item('Torch', False)
+Coal_Barrel = Item('Barrel of coal', False)
+key = Item('key', False)
+
+# Object the player does not carry
+Dark_Room_Door = RoomObj('door', False)
+
 # all possible save data
 data = {
-    'Room': 0,
-    'fe1': 1,
-    'fe2': 1,
-    'fe3': 1,
-    'has_key': 0,
-    'door_found': 0,
-    'torch': 0,
-    'coal_bucket': 0
+    'Room': Room.default,
+    'fe1': Dark_Room.has_entered,
+    'fe2': Lake_Room.has_entered,
+    'fe3': Abandoned_Forge.has_entered,
+    'fe4': Crossroads.has_entered,
+    'key': key.player_has,
+    'door_found': Dark_Room_Door.found,
+    'torch': Torch.player_has,
+    'coal_bucket': Coal_Barrel.player_has
 }
 
 
 # the different 'rooms'
 def home_screen():
-    # tells us the the player is in room 0
+    # tells us the player is in room 0
     global data
 
     # title
@@ -36,7 +71,7 @@ def home_screen():
     print(f'------------------{s.RESET_ALL}')
 
     start_text = (
-        '\nType start to begin your adventure or load to countinue your adventure. Remember type save to save and quit '
+        '\nType start to begin your adventure or load to continue your adventure. Remember type save to save and quit '
         'to quit at any point\n')
 
     for char in start_text:
@@ -62,7 +97,7 @@ def home_screen():
             os.system('clear')
 
             # begins Room 1
-            start()
+            dark_room()
 
         # checks for load command
         elif 'load' in answer:
@@ -89,24 +124,24 @@ def home_screen():
 
 
 # starting function
-def start():
+def dark_room():
     os.system('clear')
 
     # tells the code we are in room 1
-    data['Room'] = 1
+    data['Room'] = Dark_Room.num
 
     # Room title
     print(f.GREEN + 'DARK ROOM' + s.RESET_ALL)
 
     # prints this if you have been here before
-    if data['fe1'] == 0:
+    if data['fe1']:
         print(
             "\nyou're back in the dark room, its pitch black but you can feel your way around"
         )
 
     # checks if this is your first entry
-    if data['fe1'] == 1:
-        data['fe1'] = 0
+    if not data['fe1']:
+        Dark_Room.has_entered = False
 
         with open('save.json', 'w') as save:
             json.dump(data, save)
@@ -134,7 +169,7 @@ def start():
 
 # room 2's function
 def lake_room():
-    data['Room'] = 2
+    data['Room'] = Lake_Room.num
 
     # clears page for new room
     os.system('clear')
@@ -143,15 +178,15 @@ def lake_room():
     print(f.GREEN + 'LAKE OF DREAMS' + s.RESET_ALL)
 
     # checks if you have been here before
-    if data['fe2'] == 0:
+    if data['fe2']:
         print(
             '\nyou re-enter the Lake of Dreams. You again see the iridescent lake'
         )
         if data['torch'] == 0:
             print('\nOn the wall there is an lit Torch with something behind it')
 
-    if data['fe2'] == 1:
-        data['fe2'] = 0
+    if not data['fe2']:
+        Lake_Room.has_entered = False
 
         t.sleep(1)
 
@@ -168,20 +203,20 @@ def lake_room():
 
 # room 3's function
 def abandoned_forge():
-    data['Room'] = 3
+    data['Room'] = Abandoned_Forge.num
 
     # clears page for new room
     os.system('clear')
 
     # rooms title
     print(f.GREEN + 'ABANDONED FORGE' + s.RESET_ALL)
-    if data['fe3'] == 0:
+    if data['fe3']:
         print('you feel calm as you enter the forge')
 
         if data['coal_bucket'] == 0:
             print('\nin the corner there is a barrel of coal')
-    if data['fe3'] == 1:
-        data['fe3'] = 0
+    if not data['fe3']:
+        Abandoned_Forge.has_entered = True
         t.sleep(1)
 
         # room outline for player
@@ -197,21 +232,14 @@ def abandoned_forge():
 
 # general command related functions
 def go_back():
-    if data['Room'] == 1:
-        print('no')
-        start()
-    if data['Room'] == 2:
-        print('the dark room')
-        start()
-    if data['Room'] == 3:
-        print('the dark room')
-        start()
+    if data['Room'] == 2 or 3:
+        dark_room()
 
 
 def room_check():
     # checks what room the player should be in and sends them there
     if data['Room'] == 1:
-        start()
+        dark_room()
     elif data['Room'] == 2:
         lake_room()
     elif data['Room'] == 3:
@@ -220,7 +248,7 @@ def room_check():
         # creates new game if no room can be found
         print('failed to find load creating new game')
         t.sleep(3)
-        start()
+        dark_room()
 
 
 # handles all commands in the game
@@ -233,56 +261,65 @@ def cmd_handler():
             if 'left' in answer:
                 os.system('clear')
                 print('you go left')
+
                 t.sleep(3)
+
                 lake_room()
-            elif 'right' in answer:
+
+            if 'right' in answer:
                 os.system('clear')
                 print('you go right')
+
                 t.sleep(3)
+
                 abandoned_forge()
 
-        elif data['Room'] == 2:
+        if data['Room'] == 2:
+
             if 'back' in answer:
                 go_back()
 
-        elif data['Room'] == 3:
+        if data['Room'] == 3:
+
             if 'back' in answer:
                 go_back()
 
-    elif 'get' in answer:
+    if 'get' in answer:
 
         if data['Room'] == 1:
             print('')
 
         if data['Room'] == 2:
+
             if 'torch' in answer:
+
                 # checks torch status
-                if data['torch'] == 0:
+                if not data['torch']:
                     # changes torch status
-                    data['torch'] = 1
+                    data['torch'] = True
                     print('You grab the torch.')
 
         if data['Room'] == 3:
             if 'coal' in answer:
-                if data['coal_bucket'] == 0:
-                    data['coal_bucket'] = 1
+                if not data['coal_bucket']:
+                    data['coal_bucket'] = True
                     print('you grab the barrel of coal')
 
             if 'key' in answer:
-                if data['has_key'] == 0:
-                    data['has_key'] = 1
+                if not data['key']:
+                    data['key'] = True
                     print('You get the key from the anvil.')
                     print(
                         f'\nOn it there is an inscription . {f.BLUE} "The way to '
                         f'light is found in the darkest places"{s.RESET_ALL}'
                     )
 
-    elif 'open' in answer:
+    if 'open' in answer:
 
         if data['Room'] == 1:
             if 'open door' in answer:
                 # check if the player has found the door and has the key
-                if data['has_key'] == 1 and data['door_found'] == 1:
+                if data['key'] and data['door_found']:
                     print(
                         '\nThe door flies open and you are blinded by the light of the outside world'
                     )
@@ -290,7 +327,6 @@ def cmd_handler():
                     t.sleep(10)
 
                     os.system('clear')
-
                     print(
                         "\nYou've finished 0.2.1 of The Wills of Men. Thank you for playing!! "
                     )
@@ -310,7 +346,7 @@ def cmd_handler():
         if data['Room'] == 3:
             print('')
 
-    elif 'light' in answer:
+    if 'light' in answer:
 
         if data['Room'] == 1:
             print('')
@@ -320,7 +356,7 @@ def cmd_handler():
 
         if data['Room'] == 3:
             if 'forge' or 'fire' in answer:
-                if data['torch'] == 1 and data['coal_bucket'] == 1:
+                if data['torch'] and data['coal_bucket']:
                     t.sleep(2)
                     print(f'\nAs you place the coal in the forge and light the fire with your torch you feel a great '
                           f'increase in your power {f.YELLOW} Somewhere you can feel a way outsides {s.RESET_ALL} ')
@@ -329,28 +365,28 @@ def cmd_handler():
 
                     print('\na key materialises on the anvil')
 
-    elif 'explore' in answer:
+    if 'explore' in answer:
 
         if data['Room'] == 1:
             if 'explore' in answer:
                 # if they have a torch they find something
-                if data['torch'] == 1:
+                if data['torch']:
                     print(
                         '\n you look around and find what appears to be a key hole in the wall'
                     )
-                    data['door_found'] = 1
+                    data['door_found'] = True
 
         if data['Room'] == 2:
             print('')
 
         if data['Room'] == 3:
             print('')
-    elif 'save' in answer:
+    if 'save' in answer:
         with open('save.json', 'w') as save:
             json.dump(data, save)
             print('\nSaved!')
 
-    elif 'quit' in answer:
+    if 'quit' in answer:
         # asks the player i they want to save
         print('do you want to save before quitting? y/n')
 
@@ -366,9 +402,6 @@ def cmd_handler():
         elif 'n' in answer:
             print('if you say so')
             exit()
-
-    else:
-        print(f'{f.RED} Syntax error{s.RESET_ALL}')
 
 
 # calls the script
