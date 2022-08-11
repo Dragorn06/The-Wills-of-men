@@ -1,21 +1,21 @@
-#Room names
+# Room names
 - crossroads
 - Atvust (a village)
 - mountaintop
 - forest entrance
 
-###CROSSROADS
+### CROSSROADS
 first: As you step through the door you are blinded by the light of a new day.\
 second :
 
-###Atvust
+### Atvust
 first: you enter a village\
 second: 
 
-###mountaintop 
+### mountaintop 
 first:\
 second:
 
-###forest entrance
+### forest entrance>
 first:\
-second:
+second:,
