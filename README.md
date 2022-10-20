@@ -8,6 +8,3 @@ Features include:
 *   ~~flesh hungry demons~~
 
 [![Run on Repl.it](https://repl.it/badge/github/Dragorn06/text-adventure)](https://repl.it/github/Dragorn06/text-adventure)
-
-## repl.it
-when running on repl.it remember to select the language as '__python3__' and to run command as __'python main.py'__

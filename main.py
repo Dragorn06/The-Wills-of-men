@@ -1,106 +1,170 @@
-"""
-T H E   W I L L S   O F   M E N
-A high fantasy text adventure game
-by Dragorn06
-"""
-
-import sys
-
 import pygame
+import time
+import sys
+import textwrap
 
-import room
-
-WINWIDTH = 640
-WINHIEGHT = 480
-
-running = True
-
+# initialising pygame
 pygame.init()
 
+# setting up important pygame constants
+WINWIDTH, WINHIEGHT = 640, 480
 CLOCK = pygame.time.Clock()
-
 DISPLAY = pygame.display.set_mode((WINWIDTH, WINHIEGHT))
-pygame.display.set_caption('The Wills of Men')
-
-ROOM_LIST = [room.Title_Screen, room.Dark_Room]
-Room_in = room.Dark_Room
-
-BASE_FONT = pygame.font.Font(None, 28)
-WHITE = (255, 255, 255)
-
-input_text = ''
-responce_text = ''
-inventory = []
+BASE_FONT = pygame.font.Font(None, 26)
 
 
+# blue print for a room
+class Room():
 
-class main:
+    change_room = True
 
+    def __init__(self, name, description):
+        self.name = name  # the name of the room, used as the title
+        self.description = description  # the description fo the room the player is shown
+        self.contents = [] # any items in the room
+        self.exits = {}  # any exits the room has
+        self.hidden_exits = {} # any exits which are hidden - found with "explore"
+        self.locked_exits = {} # any exit the player cannot go through
 
-  @classmethod
-  def main(self):
-    global input_text, responce_text
+    # setting the window caption to the room title
+    def set_title(self):
 
-    while running:
-
-        DISPLAY.fill((0, 0, 0))
-
-        for event in pygame.event.get():
-
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_BACKSPACE:
-                    input_text = input_text[:-1]
-
-                elif event.key == pygame.K_RETURN:
-                    main.cmd_handler(Room_in)
-
-                else:
-                    input_text += event.unicode
-
-
+      title = BASE_FONT.render(main.current_room.name, True, (255,255,255))
       
-        text_surface = BASE_FONT.render(input_text, True, WHITE)
+      title_rect = title.get_rect(center = (WINWIDTH // 2, 10))
 
-        title_surface = BASE_FONT.render(Room_in.name, True, WHITE)
-        title_rect = DISPLAY.get_rect(center = (320, 240))
-        description_surface = BASE_FONT.render(Room_in.description, True, WHITE)
-      
-        responce_surface = BASE_FONT.render(responce_text, True, WHITE)
+      DISPLAY.blit(title, title_rect)
+
+    #setting the description text for a room
+    def set_description(self):
+
+      description_y = 30
+      height = 0
+      slice = 25
+
+      for i in textwrap.wrap(main.current_room.description, slice):
 
 
+        height += 18
+
+        description_surface_i = BASE_FONT.render(i, True, (255, 255, 255))
+
+        DISPLAY.blit(description_surface_i, (10, description_y))
+
+        description_y += 15
         
-        pygame.draw.rect(DISPLAY,(255, 255, 255),(200,200,0,0))
-      
-        DISPLAY.blit(text_surface, (10, WINHIEGHT - 32))
-        DISPLAY.blit(title_surface, (title_rect.centerx, 0))
-        DISPLAY.blit(responce_surface,(10, WINHIEGHT - 64))
-        DISPLAY.blit(description_surface,(10, WINHIEGHT*0.25))
+      pygame.draw.rect(DISPLAY, (255, 255, 255), pygame.Rect(8, 28, WINWIDTH/3, height), 2)
+
+    # changing the room the player is in
+    def change(self, direction):
+        # hcecks if the direction wanted is possible
+        for exit in self.exits:
+            if exit in direction:
+              
+                # sets the players current room to the new room
+                main.current_room = self.exits[exit]
+
+                main.current_room.set_title()
+
+class Item():
   
-        pygame.display.flip()
-        CLOCK.tick(60)
+    def __intit__(self, name):
+      self.name = name # the name of the item
+      self.usage = None # the usage of the item
 
+Torch = Item()
 
+#setting up rooms
+Dark_Room = Room('Dark Room', 'Suddenly you wake into a dark cave. its pitch black but you begin to feel your way around the room')
+
+Lake = Room('Lake of Dreams', 'You walk into a dimly lit cavern. in the center is a glowing blue lake. On the wall there is an lit Torch with something behind it ')
+
+# Setting up room exits
+Dark_Room.exits = {"west": Lake}
+Lake.exits = {"east": Dark_Room}
+
+# setting up locked exits
+Dark_Room.locked_exits_exits = {"north": None}
+
+# setting up hidden exits
+Dark_Room.hidden_exits = {"north": None}
+
+class main():
+
+    global input_text, room_change
+
+    # the room the player is in
+    current_room = Dark_Room
+
+    pygame.display.set_caption('The Wills of Men')
+
+    # main game loop
+    @staticmethod
+    def game_loop():
+
+        input_text = ''.lower()
+
+        while running:
+
+            DISPLAY.fill((0, 0, 0))
+
+            for event in pygame.event.get():
+
+                if event.type == pygame.QUIT:
+
+                    pygame.quit()
+                    sys.exit()
+
+                elif event.type == pygame.KEYDOWN:
+
+                    if event.key == pygame.K_BACKSPACE:
+
+                        input_text = input_text[:-1]
+
+                    elif event.key == pygame.K_RETURN:
+
+                        main.action(input_text)
+
+                        input_text = ''.lower()
+
+                    else:
+                        input_text += event.unicode
+                      
+            # Rendering the players input as it is typed
+            text_surface = BASE_FONT.render(input_text, True, (255, 255, 255))
+            DISPLAY.blit(text_surface, (10, WINHIEGHT - 32))
+
+            main.current_room.set_description()
+            main.current_room.set_title()
+              
+            pygame.display.flip()
+            CLOCK.tick(60)
+
+    @staticmethod
+    def action(input_text):
+
+        # splits the input text string into an arrary of strings
+        split_input = input_text.split()
+
+        # checks the first word against a list of actions
+        if "go" == split_input[0]:
+
+          # changes the room using the second word as an argument
+          main.current_room.change(split_input[1])
+
+        elif "get" == split_input[0]:
+          pass
+        elif "explore" == split_input[0]:
+          pass
+        elif "use" == split_input[0]:
+          pass
+
+if __name__ == "__main__":
+
+  running = True
+
+  time.sleep(1)
+
+  main.current_room.set_title()
   
-  @classmethod
-  def cmd_handler(self, room):
-    global input_text, responce_text
-
-    if 'get' in input_text:
-      for item in room.itemlist:
-        if item.name.lower() in input_text:
-          
-          inventory.append(item)
-
-          responce_text = f'you got the {item.name}'
-          print('yo')
-        else:
-          print('1')
-    else:
-      print('2')
-    input_text = ''
-
-
-main.main()
+  main.game_loop()

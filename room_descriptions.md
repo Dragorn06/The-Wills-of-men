@@ -5,17 +5,12 @@
 - forest entrance
 
 ### CROSSROADS
-first: As you step through the door you are blinded by the light of a new day.\
-second :
+As you step through the door you are blinded by the light of a new day.
 
 ### Atvust
-first: you enter a village\
-second: 
+you enter a village
 
 ### mountaintop 
-first:\
-second:
+
 
 ### forest entrance>
-first:\
-second:,
