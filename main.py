@@ -1,7 +1,6 @@
 import pygame
-import time
-import sys
 import textwrap
+import sys
 
 # initialising pygame
 pygame.init()
@@ -11,7 +10,6 @@ WINWIDTH, WINHIEGHT = 640, 480
 CLOCK = pygame.time.Clock()
 DISPLAY = pygame.display.set_mode((WINWIDTH, WINHIEGHT))
 BASE_FONT = pygame.font.Font(None, 26)
-
 
 # blue print for a room
 class Room():
@@ -29,7 +27,7 @@ class Room():
     # setting the window caption to the room title
     def set_title(self):
 
-      title = BASE_FONT.render(main.current_room.name, True, (255,255,255))
+      title = BASE_FONT.render(self.name, True, (255,255,255))
       
       title_rect = title.get_rect(center = (WINWIDTH // 2, 10))
 
@@ -39,13 +37,11 @@ class Room():
     def set_description(self):
 
       description_y = 30
-      height = 0
-      slice = 25
+      dcr_height = 0
 
-      for i in textwrap.wrap(main.current_room.description, slice):
+      for i in textwrap.wrap(self.description, 25):
 
-
-        height += 18
+        dcr_height += 17
 
         description_surface_i = BASE_FONT.render(i, True, (255, 255, 255))
 
@@ -53,7 +49,7 @@ class Room():
 
         description_y += 15
         
-      pygame.draw.rect(DISPLAY, (255, 255, 255), pygame.Rect(8, 28, WINWIDTH/3, height), 2)
+      pygame.draw.rect(DISPLAY, (255, 255, 255), pygame.Rect(8, 28, (WINWIDTH/3)+15, dcr_height), 2)
 
     # changing the room the player is in
     def change(self, direction):
@@ -65,23 +61,63 @@ class Room():
                 main.current_room = self.exits[exit]
 
                 main.current_room.set_title()
+              
+    def removeitem(self, item):
+      self.contents.remove(item)
 
+      self.description = self.description.replace(item.description, '')
+
+      main.current_room.set_description()
+      
 class Item():
-  
-    def __intit__(self, name):
+    def __init__(self, name, description):
       self.name = name # the name of the item
+      self.description = description
       self.usage = None # the usage of the item
+      self.hidden = False
 
-Torch = Item()
+class Inventory:
+  contents = []
+
+  @classmethod
+  def additem(cls, item):
+    cls.contents.append(item)
+
+  @classmethod
+  def display_inventory(cls):
+
+    Inv_height = 0
+    Inv_y = 30
+    
+    for item in cls.contents:
+
+      Inv_height += 18
+
+      item_surface_i = BASE_FONT.render(item.name, True, (255, 255, 255))
+
+      DISPLAY.blit(item_surface_i, (WINWIDTH-(WINWIDTH/3)+2, Inv_y))
+
+      Inv_y += 15
+      
+    pygame.draw.rect(DISPLAY, (255, 255, 255), pygame.Rect(WINWIDTH-(WINWIDTH/3), 28, ((WINWIDTH/4)), Inv_height), 2)
+  
+      
+# creating items 
+Torch = Item('Torch',' On the wall there is a lit Torch.')
+Coal_barrel = Item('Barrel of coal', ' In the corner there is a barrel of coal.')
 
 #setting up rooms
-Dark_Room = Room('Dark Room', 'Suddenly you wake into a dark cave. its pitch black but you begin to feel your way around the room')
+Dark_Room = Room('Dark Room', "You're in a dark cave. It is pitch black but you begin to feel your way around the room")
 
-Lake = Room('Lake of Dreams', 'You walk into a dimly lit cavern. in the center is a glowing blue lake. On the wall there is an lit Torch with something behind it ')
+Lake = Room('Lake of Dreams', 'You walk into a dimly lit cavern. In the center is a glowing blue lake. On the wall there is a lit Torch.')
+
+Abandoned_forge = Room('Abandoned Forge', 'You walk into a new room. It appears to be an old forge with old will forging equipment and an anvil. there is a thin been of light coming into the room from a man made hole in the ceiling. In the corner there is a barrel of coal.')
 
 # Setting up room exits
-Dark_Room.exits = {"west": Lake}
+Dark_Room.exits = {"west": Lake,
+                   "east": Abandoned_forge}
 Lake.exits = {"east": Dark_Room}
+Abandoned_forge.exits = {"west": Dark_Room}
 
 # setting up locked exits
 Dark_Room.locked_exits_exits = {"north": None}
@@ -89,10 +125,13 @@ Dark_Room.locked_exits_exits = {"north": None}
 # setting up hidden exits
 Dark_Room.hidden_exits = {"north": None}
 
+# setting up the contents of rooms
+Dark_Room.contents = []
+Lake.contents = [Torch]
+Abandoned_forge.contents = [Coal_barrel]
+
 class main():
-
-    global input_text, room_change
-
+  
     # the room the player is in
     current_room = Dark_Room
 
@@ -136,6 +175,8 @@ class main():
 
             main.current_room.set_description()
             main.current_room.set_title()
+
+            Inventory.display_inventory()
               
             pygame.display.flip()
             CLOCK.tick(60)
@@ -153,7 +194,13 @@ class main():
           main.current_room.change(split_input[1])
 
         elif "get" == split_input[0]:
-          pass
+          for item in main.current_room.contents:
+            
+            if split_input[1] in item.name.lower() :
+              if not item.hidden:
+                Inventory.additem(item)
+                main.current_room.removeitem(item)
+              
         elif "explore" == split_input[0]:
           pass
         elif "use" == split_input[0]:
@@ -162,8 +209,6 @@ class main():
 if __name__ == "__main__":
 
   running = True
-
-  time.sleep(1)
 
   main.current_room.set_title()
   
