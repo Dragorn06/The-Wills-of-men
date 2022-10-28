@@ -1,10 +1,5 @@
 # The Wills of Men
-a basic text based game that I am working on.
+A text adventure game I am developing. 
 
-Features include:
-*   steep difficulty curves
-*   unexplained and overcomplicated puzzles
-*   a story driven experience ( eventually )
-*   ~~flesh hungry demons~~
 
-[![Run on Repl.it](https://repl.it/badge/github/Dragorn06/text-adventure)](https://repl.it/github/Dragorn06/text-adventure)
+<a href="https://dragorn06.itch.io/the-wills-of-men">The Wills of men by Dragorn06</a>
