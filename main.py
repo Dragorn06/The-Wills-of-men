@@ -114,7 +114,7 @@ Key.usage = l1_OpenDoor
 Dark_Room = Room(
     'Dark Room', 0,
     "You're in a dark cave. It is pitch black but you begin to feel your way around the room",
-    'To the north of the room you find a key hole.')
+    ' To the north of the room you find a key hole.')
 
 Lake = Room(
     'Lake of Dreams',
@@ -242,8 +242,11 @@ class main:
 
         elif "explore" == split_input[0]:
             if Torch in Inventory.contents:
-                cls.responce = f'you look around. {cls.current_room.exploreText}'
+                cls.responce = f'you look around.{cls.current_room.exploreText}'
 
+                if cls.current_room.exploreText != ' you find nothing of note': 
+                  cls.current_room.description += cls.current_room.exploreText
+                  
                 cls.current_room.hidden_exits = []
 
                 save(cls.current_room.id)

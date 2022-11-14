@@ -42,6 +42,8 @@ def load():
         for obj in gc.get_objects():
             if isinstance(obj, Room):
 
+                obj.contents = []
+
                 roomData = allRoomData[f'{obj.id}']
 
                 obj.locked_exits = roomData['Locked exits']
@@ -49,8 +51,7 @@ def load():
                 obj.description = roomData['Description']
 
                 if obj.id == roomId:
-                   currentRoom = obj
-                   return currentRoom
+                    currentRoom = obj
 
                 for item in gc.get_objects():
                     if isinstance(item, Item):
@@ -62,3 +63,4 @@ def load():
                     Inventory.contents.append(obj)
 
         saveFile.close()
+        return currentRoom

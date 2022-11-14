@@ -1,0 +1,36 @@
+{
+    "current room": 1,
+    "Inventory": [
+        0
+    ],
+    "Rooms": {
+        "0": {
+            "Name": "Dark Room",
+            "Description": "You're in a dark cave. It is pitch black but you begin to feel your way around the room",
+            "Contents": [],
+            "Hidden exits": [
+                "north"
+            ],
+            "Locked exits": [
+                "north"
+            ]
+        },
+        "1": {
+            "Name": "Lake of Dreams",
+            "Description": "You walk into a dimly lit cavern. In the center is a glowing blue lake.",
+            "Contents": [],
+            "Hidden exits": [],
+            "Locked exits": []
+        },
+        "2": {
+            "Name": "Abandoned Forge",
+            "Description": "You walk into a new room. It appears to be an old forge with old will forging equipment and an anvil. there is a thin been of light coming into the room from a man made hole in the ceiling. In the corner there is a barrel of coal.",
+            "Contents": [
+                1,
+                2
+            ],
+            "Hidden exits": [],
+            "Locked exits": []
+        }
+    }
+}
