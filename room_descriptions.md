@@ -46,5 +46,4 @@ The smell of ale and heartiness wafts towards you as you enter the Tavern. Once 
 ### forest entrance
 </ins>
 
-
 https://dragorn06.itch.io/the-wills-of-men?secret=61fAwc5YuRpINYSHXJ6BBcFWqs

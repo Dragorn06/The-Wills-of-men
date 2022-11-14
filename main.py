@@ -1,12 +1,12 @@
 import pygame
 import textwrap
 import sys
-import shelve
 
 from structure.Items import Item
 from structure.Inv import Inventory
 from structure.Rooms import Room
 from structure.Homescreen import Homescreen
+from structure.saves import save, load
 from structure.constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY, BASE_FONT, FANCY_FONT
 
 # initialising pygame
@@ -69,11 +69,11 @@ def set_description():
 
 # creating items
 
-Torch = Item('Torch', ' On the wall there is a lit Torch.')
-CoalBarrel = Item('Barrel of coal',
+Torch = Item('Torch', 0, ' On the wall there is a lit Torch.')
+CoalBarrel = Item('Barrel of coal', 1,
                   ' In the corner there is a barrel of coal.')
 
-Key = Item('Rusty key', '')
+Key = Item('Rusty key', 2, '')
 
 # Hidding items
 Key.hidden = True
@@ -86,7 +86,12 @@ second word - what it does
 
 
 def l1_LightForge():
+    print(main.currentRoom.name)
+    for i in Inventory.contents:
+        print(i.name)
+
     if main.currentRoom == Abandoned_forge and Torch in Inventory.contents and CoalBarrel in Inventory.contents:
+
         main.responce = 'you light the forge with the torch and coal. Suddenly a key appears on the anvil'
 
         Key.description = 'There is a Rusty key on the anvil'
@@ -107,17 +112,18 @@ CoalBarrel.usage = l1_LightForge
 Key.usage = l1_OpenDoor
 
 Dark_Room = Room(
-    'Dark Room',
+    'Dark Room', 0,
     "You're in a dark cave. It is pitch black but you begin to feel your way around the room",
-    'To the north of the room you find a key hole')
+    'To the north of the room you find a key hole.')
 
 Lake = Room(
     'Lake of Dreams',
+    1,
     'You walk into a dimly lit cavern. In the center is a glowing blue lake. On the wall there is a lit Torch.',
 )
 
 Abandoned_forge = Room(
-    'Abandoned Forge',
+    'Abandoned Forge', 2,
     'You walk into a new room. It appears to be an old forge with old will forging equipment and an anvil. there is a thin been of light coming into the room from a man made hole in the ceiling. In the corner there is a barrel of coal.'
 )
 
@@ -213,6 +219,7 @@ class main:
                 cls.responce = f'you go {direction}'
 
                 # sets the playrs current room to the new room
+                save(cls.currentRoom.id)
                 cls.currentRoom = cls.currentRoom.Exits[direction]
 
             else:
@@ -229,12 +236,15 @@ class main:
                         Inventory.additem(item)
                         cls.responce = f'you get the {item.name}'
                         cls.currentRoom.removeitem(item)
+                        save(cls.currentRoom.id)
 
         elif "explore" == split_input[0]:
             if Torch in Inventory.contents:
                 cls.responce = f'you look around. {cls.currentRoom.exploreText}'
 
                 cls.currentRoom.hidden_exits = []
+
+                save(cls.currentRoom.id)
 
         elif "use" == split_input[0]:
             for item in Inventory.contents:
@@ -244,10 +254,11 @@ class main:
                     item.usage()
 
         elif "save" == split_input[0]:
-            cls.save()
+            save(cls.currentRoom.id)
+            cls.responce = 'you save'
 
         elif "load" == split_input[0]:
-            cls.load()
+            load()
 
         elif "quit" == split_input[0]:
             pygame.quit()
@@ -264,30 +275,13 @@ class main:
 
         DISPLAY.blit(responce_surface, (10, WINHIEGHT - 57))
 
-    @classmethod
-    def save(cls):
-        saveFile = shelve.open('saves/save')
-
-        saveFile['currentRoom'] = main.currentRoom
-        saveFile['inventory'] = Inventory.contents
-
-        main.responce = 'you save'
-
-    @classmethod
-    def load(cls):
-        saveFile = shelve.open('saves/save')
-
-        main.currentRoom = saveFile['currentRoom']
-        Inventory.contents = saveFile['inventory']
-
-
 if __name__ == "__main__":
 
     set_title()
 
     Homescreen.loop()
     if Homescreen.donext == 'load':
-        main.load()
+        load()
     else:
         pass
     main.game_loop()

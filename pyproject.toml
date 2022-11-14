@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "repl_python3_The-Wills-of-Men"
-version = "0.1.0"
+name = "The-Wills-of-Men"
+version = "0.3.0a"
 description = ""
 authors = ["repl.it user <replituser@example.com>"]
 
