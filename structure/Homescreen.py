@@ -13,7 +13,7 @@ class Homescreen:
     by = SMALL_FONT_1.render("by Dragorn06", True, (255,255,255))
     prompt = SMALL_FONT_2.render('Type "start" to begin and "load" to load a save. To quit type "quit".', True, (255,255,255))
     title = FANCY_FONT.render("THE WILLS OF MEN", True, (255, 255, 255))
-  
+
     title_rect = title.get_rect(center=(WINWIDTH // 2, WINHIEGHT//2))
     by_rect = by.get_rect(center=(WINWIDTH // 2, WINHIEGHT//2+32))
     prompt_rect = prompt.get_rect(center=(WINWIDTH // 2, WINHIEGHT//2+128))
@@ -74,6 +74,6 @@ class Homescreen:
             pygame.display.flip()
             CLOCK.tick(60)
 
-            if cls.donext != None:
+            if cls.donext is not None:
               break
 

@@ -38,7 +38,7 @@ def display_inventory():
 # setting the window caption to the room title
 def set_title():
 
-    title = FANCY_FONT.render(main.current_Room.name, True, (255, 255, 255))
+    title = FANCY_FONT.render(main.current_room.name, True, (255, 255, 255))
 
     title_rect = title.get_rect(center=(WINWIDTH // 2, 20))
 
@@ -51,7 +51,7 @@ def set_description():
     description_y = 50
     dcr_height = 0
 
-    for i in textwrap.wrap(main.current_Room.description, 25):
+    for i in textwrap.wrap(main.current_room.description, 25):
 
         dcr_height += 18
 
@@ -86,11 +86,11 @@ second word - what it does
 
 
 def l1_LightForge():
-    print(main.current_Room.name)
+    print(main.current_room.name)
     for i in Inventory.contents:
         print(i.name)
 
-    if main.current_Room == Abandoned_forge and Torch in Inventory.contents and CoalBarrel in Inventory.contents:
+    if main.current_room == Abandoned_forge and Torch in Inventory.contents and CoalBarrel in Inventory.contents:
 
         main.responce = 'you light the forge with the torch and coal. Suddenly a key appears on the anvil'
 
@@ -101,10 +101,10 @@ def l1_LightForge():
 
 
 def l1_OpenDoor():
-    if main.current_Room == Dark_Room and "north" not in Dark_Room.hidden_exits:
+    if main.current_room == Dark_Room and "north" not in Dark_Room.hidden_exits:
 
         main.responce = "you open the door"
-        main.current_Room.locked_exits.remove("north")
+        main.current_room.locked_exits.remove("north")
 
 
 Torch.usage = l1_LightForge
@@ -148,7 +148,7 @@ Abandoned_forge.contents = [CoalBarrel, Key]
 class main:
 
     # the room the player is in
-    current_Room = Dark_Room
+    current_room = Dark_Room
 
     # responce
     responce = ''
@@ -213,15 +213,16 @@ class main:
         elif "go" == split_input[0]:
             # changes the room using the second word as an argument
 
-            direction = cls.current_Room.change(split_input[1])
+            direction = cls.current_room.change(split_input[1])
 
-            if not direction:
+          
+            if direction:
 
                 cls.responce = f'you go {direction}'
 
                 # sets the playrs current room to the new room
-                save(cls.current_Room.id)
-                cls.current_Room = cls.current_Room.Exits[direction]
+                save(cls.current_room.id)
+                cls.current_room = cls.current_room.Exits[direction]
 
             else:
                 cls.responce = 'I dont understand'
@@ -229,23 +230,23 @@ class main:
         elif "get" == split_input[0]:
 
             # checks items in a room against the players input
-            for item in main.current_Room.contents:
+            for item in main.current_room.contents:
                 if split_input[1] in item.name.lower():
 
                     if not item.hidden:
 
                         Inventory.additem(item)
                         cls.responce = f'you get the {item.name}'
-                        cls.current_Room.removeitem(item)
-                        save(cls.current_Room.id)
+                        cls.current_room.removeitem(item)
+                        save(cls.current_room.id)
 
         elif "explore" == split_input[0]:
             if Torch in Inventory.contents:
-                cls.responce = f'you look around. {cls.current_Room.exploreText}'
+                cls.responce = f'you look around. {cls.current_room.exploreText}'
 
-                cls.current_Room.hidden_exits = []
+                cls.current_room.hidden_exits = []
 
-                save(cls.current_Room.id)
+                save(cls.current_room.id)
 
         elif "use" == split_input[0]:
             for item in Inventory.contents:
@@ -255,11 +256,11 @@ class main:
                     item.usage()
 
         elif "save" == split_input[0]:
-            save(cls.current_Room.id)
+            save(cls.current_room.id)
             cls.responce = 'you save'
 
         elif "load" == split_input[0]:
-            load(cls.currentRoom)
+             cls.current_room = load()
 
         elif "quit" == split_input[0]:
             pygame.quit()
@@ -282,7 +283,7 @@ if __name__ == "__main__":
 
     Homescreen.loop()
     if Homescreen.donext == 'load':
-        load(main.currentRoom)
+        main.current_room = load()
     else:
         pass
     main.game_loop()

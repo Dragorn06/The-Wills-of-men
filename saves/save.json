@@ -1,5 +1,5 @@
 {
-    "current room": 0,
+    "current room": 1,
     "Inventory": [
         0,
         2
@@ -15,14 +15,22 @@
         "1": {
             "Name": "Lake of Dreams",
             "Description": "You walk into a dimly lit cavern. In the center is a glowing blue lake.",
-            "Contents": [],
+            "Contents": [
+                0,
+                0
+            ],
             "Hidden exits": [],
             "Locked exits": []
         },
         "2": {
             "Name": "Abandoned Forge",
             "Description": "You walk into a new room. It appears to be an old forge with old will forging equipment and an anvil. there is a thin been of light coming into the room from a man made hole in the ceiling.",
-            "Contents": [],
+            "Contents": [
+                1,
+                2,
+                1,
+                2
+            ],
             "Hidden exits": [],
             "Locked exits": []
         }

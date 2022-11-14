@@ -31,7 +31,7 @@ def save(currentRoom):
         saveFile.close()
 
 
-def load(currentRoom):
+def load():
     with open('saves/save.json', 'r', encoding='utf-8') as saveFile:
         load = json.load(saveFile)
 
@@ -49,7 +49,8 @@ def load(currentRoom):
                 obj.description = roomData['Description']
 
                 if obj.id == roomId:
-                    currentRoom = obj
+                   currentRoom = obj
+                   return currentRoom
 
                 for item in gc.get_objects():
                     if isinstance(item, Item):
