@@ -4,7 +4,6 @@ from .constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY, BASE_FONT, FANCY_FON
 
 class Homescreen:
 
-  
     SMALL_FONT_1 = pygame.font.Font('structure/fonts/antiquity-print.ttf', 16)
     SMALL_FONT_2 = pygame.font.Font('structure/fonts/BitPotionExt.ttf', 24)
 
