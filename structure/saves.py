@@ -10,6 +10,7 @@ def save(currentRoom):
     with open('saves/save.json', 'w', encoding='utf-8') as saveFile:
         inv = []
         roomData = {}
+        itemData = {}
 
         for item in Inventory.contents:
             inv.append(item.id)
@@ -18,11 +19,15 @@ def save(currentRoom):
             if isinstance(obj, Room):
                 roomData[f'{obj.id}'] = obj.data()
 
+            elif isinstance(obj, Item):
+                itemData[f'{obj.id}'] = obj.data()
+
         json.dump(
             {
                 "current room": currentRoom,
                 "Inventory": inv,
-                "Rooms": roomData
+                "Rooms": roomData,
+                "Items": itemData
             },
             saveFile,
             ensure_ascii=False,
@@ -32,11 +37,15 @@ def save(currentRoom):
 
 
 def load():
+
+    global roomData, contents
+
     with open('saves/save.json', 'r', encoding='utf-8') as saveFile:
         load = json.load(saveFile)
 
         roomId = load['current room']
         allRoomData = load['Rooms']
+        allitemData = load['Items']
         inv = load['Inventory']
 
         for obj in gc.get_objects():
@@ -45,6 +54,7 @@ def load():
                 obj.contents = []
 
                 roomData = allRoomData[f'{obj.id}']
+                contents = roomData['Contents']
 
                 obj.locked_exits = roomData['Locked exits']
                 obj.hidden_exits = roomData['Hidden exits']
@@ -53,14 +63,18 @@ def load():
                 if obj.id == roomId:
                     currentRoom = obj
 
-                for item in gc.get_objects():
-                    if isinstance(item, Item):
-                        if item.id in roomData['Contents']:
-                            obj.contents.append(item)
-
+        for obj in gc.get_objects():
             if isinstance(obj, Item):
-                if obj.id in inv:
+
+                if obj.id in contents:
+                    obj.contents.append(obj)
+
+                elif obj.id in inv:
                     Inventory.contents.append(obj)
+
+                itemData = allitemData[f'{obj.id}']
+
+                obj.hidden = itemData['Is Hidden']
 
         saveFile.close()
         return currentRoom

@@ -11,8 +11,8 @@ class Item():
               f'Usage: {self.usage}\n'
               f'Is Hidden: {self.hidden}')
 
-        return {
+    def data(self):
+      return {
             "Name": self.name,
-            "Usage": self.usage,
             "Is Hidden": self.hidden
         }

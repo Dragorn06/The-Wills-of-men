@@ -12,7 +12,6 @@ from structure.constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY, BASE_FONT, 
 # initialising pygame
 pygame.init()
 
-
 # rendering functions
 def display_inventory():
 
@@ -53,7 +52,7 @@ def set_description():
 
     for i in textwrap.wrap(main.current_room.description, 25):
 
-        dcr_height += 18
+        dcr_height += 17
 
         description_surface_i = BASE_FONT.render(i, True, (255, 255, 255))
 
@@ -105,6 +104,7 @@ def l1_OpenDoor():
 
         main.responce = "you open the door"
         main.current_room.locked_exits.remove("north")
+        Inventory.removeItem(Key)
 
 
 Torch.usage = l1_LightForge
@@ -128,10 +128,45 @@ Abandoned_forge = Room(
     'there is a thin been of light coming into the room from a man made hole in the ceiling. In the corner there is a barrel of coal.'
 )
 
+Crossroads = Room(
+  'Crossroads', 3,
+  'you find yourself at a crossroads in the mountains. There are three paths infront of you. One leads west down into a dark sprawlling forest. Another track to the east winds up high into the mountains. The last path leads down to a small hamlet far bellow you.',
+)
+
+Atvust = Room(
+  'Atvust', 4,
+  'you enter the village of Avust. As you walk down the narrow but clean streets the sounds of merriment begin to surround you. Soon you come to the main square to the west there is a tavern and to the east there is a market.'
+)
+
+Mountaintop = Room(
+  'Mountaintop', 5,
+  ''
+)
+
+Forest_entrance = Room(
+  'Forest Entrance', 6,
+  'You are unerved by the forrest as if the is an evil presense here. In the future there will be something here.'
+)
+
+Atvust_Market = Room(
+  'Market', 7,
+  'The small market you are now presented with is surprisingly lively. All around you villagers are haggling with merchants from the outer dales. Sitting quietly at one of the stands at the far end of the market is a wizard.'
+)
+
+Atvust_Tavern = Room(
+  'Tavern',8 ,
+  'The smell of hearty ale wafts towards you as you enter the Tavern. Once you are inside you see many people of the town including several arcinthian dwarves drinking and sining merrily. behind the bar you see the Landlord cleaning an tankard. '
+)
 # Setting up room exits
-Dark_Room.Exits = {"north": None, "east": Abandoned_forge, "west": Lake}
+Dark_Room.Exits = {"north": Crossroads, "east": Abandoned_forge, "west": Lake}
 Lake.Exits = {"east": Dark_Room}
 Abandoned_forge.Exits = {"west": Dark_Room}
+Crossroads.Exits = {"north": Atvust, "south": Dark_Room, "east": Mountaintop, "west": Forest_entrance}
+Atvust.Exits = {"south": Crossroads, "west": Atvust_Tavern, "east": Atvust_Market}
+Mountaintop.Exits = {"west": Crossroads}
+Forest_entrance.Exits = {"east": Crossroads}
+Atvust_Market.Exits = {"west": Atvust}
+Atvust_Tavern.Exits = {"east": Atvust}
 
 # setting up locked exits
 Dark_Room.locked_exits = ["north"]
