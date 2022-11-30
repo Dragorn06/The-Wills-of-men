@@ -4,7 +4,6 @@ from .Inv import Inventory
 from .Rooms import Room
 from .Items import Item
 
-
 def save(currentRoom):
 
     with open('saves/save.json', 'w', encoding='utf-8') as saveFile:
@@ -13,14 +12,14 @@ def save(currentRoom):
         itemData = {}
 
         for item in Inventory.contents:
-            inv.append(item.id)
+            inv.append(item.Id)
 
         for obj in gc.get_objects():
             if isinstance(obj, Room):
-                roomData[f'{obj.id}'] = obj.data()
+                roomData[f'{obj.Id}'] = obj.data()
 
             elif isinstance(obj, Item):
-                itemData[f'{obj.id}'] = obj.data()
+                itemData[f'{obj.Id}'] = obj.data()
 
         json.dump(
             {
@@ -38,41 +37,39 @@ def save(currentRoom):
 
 def load():
 
-    global roomData, contents
-
     with open('saves/save.json', 'r', encoding='utf-8') as saveFile:
-        load = json.load(saveFile)
+        loadData = json.load(saveFile)
 
-        roomId = load['current room']
-        allRoomData = load['Rooms']
-        allitemData = load['Items']
-        inv = load['Inventory']
+        roomId = loadData['current room']
+        allRoomData = loadData['Rooms']
+        allitemData = loadData['Items']
+        inv = loadData['Inventory']
 
         for obj in gc.get_objects():
             if isinstance(obj, Room):
 
                 obj.contents = []
 
-                roomData = allRoomData[f'{obj.id}']
+                roomData = allRoomData[f'{obj.Id}']
                 contents = roomData['Contents']
 
                 obj.locked_exits = roomData['Locked exits']
                 obj.hidden_exits = roomData['Hidden exits']
                 obj.description = roomData['Description']
 
-                if obj.id == roomId:
+                if obj.Id == roomId:
                     currentRoom = obj
 
         for obj in gc.get_objects():
             if isinstance(obj, Item):
 
-                if obj.id in contents:
+                if obj.Id in contents:
                     obj.contents.append(obj)
 
-                elif obj.id in inv:
+                elif obj.Id in inv:
                     Inventory.contents.append(obj)
 
-                itemData = allitemData[f'{obj.id}']
+                itemData = allitemData[f'{obj.Id}']
 
                 obj.hidden = itemData['Is Hidden']
 

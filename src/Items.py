@@ -1,15 +1,19 @@
 class Item():
-    def __init__(self, name, id, description):
+    def __init__(self, name, Id, description):
         self.name = name  # the name of the item
-        self.id = id
+        self.Id = Id
         self.description = description
         self.usage = None  # the usage of the item
         self.hidden = False
 
-    def __str__(self):
-        print(f'Name: {self.name}\n '
-              f'Usage: {self.usage}\n'
-              f'Is Hidden: {self.hidden}')
+    def debug(self):
+      return {
+        "Name": self.name,
+        "ID": self.Id,
+        "Is Hidden": self.hidden,
+        "description": self.description,
+        "usage": self.usage,
+      }
 
     def data(self):
       return {

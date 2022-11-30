@@ -5,11 +5,11 @@ class Room():
 
     def __init__(self,
                  name,
-                 id,
+                 Id,
                  description,
                  exploreText=' you find nothing of note'):
         self.name = name  # the name of the room, used as the title
-        self.id = id
+        self.Id = Id
         self.description = description  # the description fo the room the player is shown
         self.exploreText = exploreText
         self.contents = []  # any items in the room
@@ -24,10 +24,7 @@ class Room():
 
         if direction in self.Exits and direction not in self.hidden_exits and direction not in self.locked_exits:
             return direction
-
-        else:
-            return False
-
+          
     def removeitem(self, item):
         self.contents.remove(item)
 
@@ -35,7 +32,7 @@ class Room():
 
     def debug(self):
         print(f'Name: {self.name}\n'
-              f'ID: {self.id}\n'
+              f'ID: {self.Id}\n'
               f'Description {self.description}\n'
               f'Text On Explore: {self.exploreText}\n'
               f'Contents: {self.contents}\n'
@@ -43,10 +40,12 @@ class Room():
               f'Hidden exits: {self.hidden_exits}\n'
               f'Locked exits: {self.locked_exits}\n')
 
+        return 0
+
     def data(self):
         conts = []
         for item in self.contents:
-            conts.append(item.id)
+            conts.append(item.Id)
 
 
       

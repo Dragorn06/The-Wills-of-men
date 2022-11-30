@@ -2,12 +2,12 @@ import pygame
 import textwrap
 import sys
 
-from structure.Items import Item
-from structure.Inv import Inventory
-from structure.Rooms import Room
-from structure.Homescreen import Homescreen
-from structure.saves import save, load
-from structure.constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY, BASE_FONT, FANCY_FONT
+from src.Inv import Inventory
+from src.Items import Item
+from src.Rooms import Room
+from src.Homescreen import Homescreen
+from src.saves import save, load
+from src.constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY, BASE_FONT, FANCY_FONT
 
 # initialising pygame
 pygame.init()
@@ -85,10 +85,6 @@ second word - what it does
 
 
 def l1_LightForge():
-    print(main.current_room.name)
-    for i in Inventory.contents:
-        print(i.name)
-
     if main.current_room == Abandoned_forge and Torch in Inventory.contents and CoalBarrel in Inventory.contents:
 
         main.responce = 'you light the forge with the torch and coal. Suddenly a key appears on the anvil'
@@ -111,6 +107,7 @@ Torch.usage = l1_LightForge
 CoalBarrel.usage = l1_LightForge
 Key.usage = l1_OpenDoor
 
+# Level 1
 Dark_Room = Room(
     'Dark Room', 0,
     "You're in a dark cave. It is pitch black but you begin to feel your way around the room",
@@ -128,6 +125,7 @@ Abandoned_forge = Room(
     'there is a thin been of light coming into the room from a man made hole in the ceiling. In the corner there is a barrel of coal.'
 )
 
+# Level 2
 Crossroads = Room(
   'Crossroads', 3,
   'you find yourself at a crossroads in the mountains. There are three paths infront of you. One leads west down into a dark sprawlling forest. Another track to the east winds up high into the mountains. The last path leads down to a small hamlet far bellow you.',
@@ -241,7 +239,7 @@ class main:
         # splits the input text string into an arrary of strings
         split_input = input_text.split()
 
-        if [] == split_input or [''] == split_input:
+        if split_input in ([''],[],[' ']):
             pass
 
         # checks the first word against a list of actions
@@ -256,7 +254,7 @@ class main:
                 cls.responce = f'you go {direction}'
 
                 # sets the playrs current room to the new room
-                save(cls.current_room.id)
+                save(cls.current_room.Id)
                 cls.current_room = cls.current_room.Exits[direction]
 
             else:
@@ -273,7 +271,7 @@ class main:
                         Inventory.additem(item)
                         cls.responce = f'you get the {item.name}'
                         cls.current_room.removeitem(item)
-                        save(cls.current_room.id)
+                        save(cls.current_room.Id)
 
         elif "explore" == split_input[0]:
             if Torch in Inventory.contents:
@@ -284,7 +282,7 @@ class main:
                   
                 cls.current_room.hidden_exits = []
 
-                save(cls.current_room.id)
+                save(cls.current_room.Id)
 
         elif "use" == split_input[0]:
             for item in Inventory.contents:
@@ -294,7 +292,7 @@ class main:
                     item.usage()
 
         elif "save" == split_input[0]:
-            save(cls.current_room.id)
+            save(cls.current_room.Id)
             cls.responce = 'you save'
 
         elif "load" == split_input[0]:

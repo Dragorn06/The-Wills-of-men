@@ -1,0 +1,92 @@
+{
+    "current room": 2,
+    "Inventory": [
+        0,
+        1
+    ],
+    "Rooms": {
+        "0": {
+            "Name": "Dark Room",
+            "Description": "You're in a dark cave. It is pitch black but you begin to feel your way around the room",
+            "Contents": [],
+            "Hidden exits": [
+                "north"
+            ],
+            "Locked exits": [
+                "north"
+            ]
+        },
+        "1": {
+            "Name": "Lake of Dreams",
+            "Description": "You walk into a dimly lit cavern. In the center is a glowing blue lake.",
+            "Contents": [],
+            "Hidden exits": [],
+            "Locked exits": []
+        },
+        "2": {
+            "Name": "Abandoned Forge",
+            "Description": "You walk into a new room. It appears to be an old forge with old will forging equipment and an anvil. there is a thin been of light coming into the room from a man made hole in the ceiling.",
+            "Contents": [
+                2
+            ],
+            "Hidden exits": [],
+            "Locked exits": []
+        },
+        "3": {
+            "Name": "Crossroads",
+            "Description": "you find yourself at a crossroads in the mountains. There are three paths infront of you. One leads west down into a dark sprawlling forest. Another track to the east winds up high into the mountains. The last path leads down to a small hamlet far bellow you.",
+            "Contents": [],
+            "Hidden exits": [],
+            "Locked exits": []
+        },
+        "4": {
+            "Name": "Atvust",
+            "Description": "you enter the village of Avust. As you walk down the narrow but clean streets the sounds of merriment begin to surround you. Soon you come to the main square to the west there is a tavern and to the east there is a market.",
+            "Contents": [],
+            "Hidden exits": [],
+            "Locked exits": []
+        },
+        "5": {
+            "Name": "Mountaintop",
+            "Description": "",
+            "Contents": [],
+            "Hidden exits": [],
+            "Locked exits": []
+        },
+        "6": {
+            "Name": "Forest Entrance",
+            "Description": "You are unerved by the forrest as if the is an evil presense here. In the future there will be something here.",
+            "Contents": [],
+            "Hidden exits": [],
+            "Locked exits": []
+        },
+        "7": {
+            "Name": "Market",
+            "Description": "The small market you are now presented with is surprisingly lively. All around you villagers are haggling with merchants from the outer dales. Sitting quietly at one of the stands at the far end of the market is a wizard.",
+            "Contents": [],
+            "Hidden exits": [],
+            "Locked exits": []
+        },
+        "8": {
+            "Name": "Tavern",
+            "Description": "The smell of hearty ale wafts towards you as you enter the Tavern. Once you are inside you see many people of the town including several arcinthian dwarves drinking and sining merrily. behind the bar you see the Landlord cleaning an tankard. ",
+            "Contents": [],
+            "Hidden exits": [],
+            "Locked exits": []
+        }
+    },
+    "Items": {
+        "0": {
+            "Name": "Torch",
+            "Is Hidden": false
+        },
+        "1": {
+            "Name": "Barrel of coal",
+            "Is Hidden": false
+        },
+        "2": {
+            "Name": "Rusty key",
+            "Is Hidden": true
+        }
+    }
+}
