@@ -24,31 +24,26 @@ class Room():
 
         if direction in self.Exits and direction not in self.hidden_exits and direction not in self.locked_exits:
             return direction
-          
-    def removeitem(self, item):
+
+    def remove_item(self, item):
         self.contents.remove(item)
 
         self.description = self.description.replace(item.description, '')
 
-    def debug(self):
-        print(f'Name: {self.name}\n'
-              f'ID: {self.Id}\n'
-              f'Description {self.description}\n'
-              f'Text On Explore: {self.exploreText}\n'
-              f'Contents: {self.contents}\n'
-              f'Exits: {self.Exits}\n'
-              f'Hidden exits: {self.hidden_exits}\n'
-              f'Locked exits: {self.locked_exits}\n')
-
         return 0
+
+    def add_item(self, item):
+
+        if item not in self.contents:
+            self.contents.append(item)
+
+        self.description += item.description
 
     def data(self):
         conts = []
         for item in self.contents:
             conts.append(item.Id)
 
-
-      
         return {
             "Name": self.name,
             "Description": self.description,
@@ -56,3 +51,4 @@ class Room():
             "Hidden exits": self.hidden_exits,
             "Locked exits": self.locked_exits
         }
+

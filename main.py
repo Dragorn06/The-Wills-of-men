@@ -1,41 +1,25 @@
+# general imports
 import pygame
 import textwrap
 import sys
 
+# importing other parts of the game
 from src.Inv import Inventory
 from src.Items import Item
 from src.Rooms import Room
 from src.Homescreen import Homescreen
 from src.saves import save, load
-from src.constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY, BASE_FONT, FANCY_FONT
+from src.constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY
+from src.constants import BASE_FONT, FANCY_FONT
 
 # initialising pygame
 pygame.init()
 
 # rendering functions
-def display_inventory():
-
-    Inv_height = 0
-    Inv_y = 50
-
-    for item in Inventory.contents:
-
-        Inv_height += 20
-
-        item_surface_i = BASE_FONT.render(item.name, True, (255, 255, 255))
-
-        DISPLAY.blit(item_surface_i, (WINWIDTH - (WINWIDTH / 3) + 2, Inv_y))
-
-        Inv_y += 15
-
-    pygame.draw.rect(
-        DISPLAY, (255, 255, 255),
-        pygame.Rect(WINWIDTH - (WINWIDTH / 3), 50, ((WINWIDTH / 4)),
-                    Inv_height), 2)
 
 
 # setting the window caption to the room title
-def set_title():
+def render_title():
 
     title = FANCY_FONT.render(main.current_room.name, True, (255, 255, 255))
 
@@ -44,15 +28,12 @@ def set_title():
     DISPLAY.blit(title, title_rect)
 
 
-#setting the description text for a room
-def set_description():
+# setting the description text for a room
+def render_description():
 
     description_y = 50
-    dcr_height = 0
 
-    for i in textwrap.wrap(main.current_room.description, 25):
-
-        dcr_height += 17
+    for i in textwrap.wrap(main.current_room.description, 30):
 
         description_surface_i = BASE_FONT.render(i, True, (255, 255, 255))
 
@@ -60,19 +41,49 @@ def set_description():
 
         description_y += 15
 
-    pygame.draw.rect(DISPLAY, (255, 255, 255),
-                     pygame.Rect(8, 48, (WINWIDTH / 3) + 15, dcr_height), 2)
+
+# displaying the player's inventory
+def render_inventory():
+
+    Inv_y = 50
+
+    for item in Inventory.contents:
+
+        item_surface_i = BASE_FONT.render(item.name, True, (255, 255, 255))
+
+        DISPLAY.blit(item_surface_i, (WINWIDTH - (WINWIDTH / 3) + 2, Inv_y))
+
+        Inv_y += 15
 
 
-#setting up rooms
+# render text for an event that has occured
+def render_event():
+
+    event_surface = BASE_FONT.render(main.event, True, (255, 255, 255))
+
+    event_rect = event_surface.get_rect(center=(WINWIDTH // 2,
+                                                WINHIEGHT - (WINHIEGHT // 3)))
+
+    DISPLAY.blit(event_surface, event_rect)
+
+
+# rendering responce text
+def render_responcetext():
+
+    responce_surface = BASE_FONT.render(main.responce, True, (255, 255, 255))
+
+    DISPLAY.blit(responce_surface, (10, WINHIEGHT - 57))
+
 
 # creating items
-
 Torch = Item('Torch', 0, ' On the wall there is a lit Torch.')
 CoalBarrel = Item('Barrel of coal', 1,
                   ' In the corner there is a barrel of coal.')
 
 Key = Item('Rusty key', 2, '')
+CoinBag = Item(
+    'Bag of Coins', 3,
+    'In the gutter you see a bag of coins glinting in the sunlight.')
 
 # Hidding items
 Key.hidden = True
@@ -85,82 +96,111 @@ second word - what it does
 
 
 def l1_LightForge():
-    if main.current_room == Abandoned_forge and Torch in Inventory.contents and CoalBarrel in Inventory.contents:
+    if main.current_room == Abandoned_forge:
+        if Torch in Inventory.contents and CoalBarrel in Inventory.contents:
 
-        main.responce = 'you light the forge with the torch and coal. Suddenly a key appears on the anvil'
+            main.responce = "you light the forge with the torch and coal."
 
-        Key.description = 'There is a Rusty key on the anvil'
-        Key.hidden = False
+            main.event = "Suddenly a key appears on the anvil"
 
-        Inventory.removeItem(CoalBarrel)
+            Key.description = 'There is a Rusty key on the anvil'
+            Key.hidden = False
+
+            main.current_room.add_item(Key)
+
+            Inventory.remove_item(CoalBarrel)
 
 
 def l1_OpenDoor():
-    if main.current_room == Dark_Room and "north" not in Dark_Room.hidden_exits:
+    if main.current_room == Dark_Room:
+        if "north" not in Dark_Room.hidden_exits:
 
-        main.responce = "you open the door"
-        main.current_room.locked_exits.remove("north")
-        Inventory.removeItem(Key)
+            main.responce = "you open the door"
+            main.current_room.locked_exits.remove("north")
+            Inventory.remove_item(Key)
 
 
+# assigning usages to items
 Torch.usage = l1_LightForge
 CoalBarrel.usage = l1_LightForge
 Key.usage = l1_OpenDoor
 
 # Level 1
 Dark_Room = Room(
-    'Dark Room', 0,
-    "You're in a dark cave. It is pitch black but you begin to feel your way around the room",
+    'Dark Room', 0, """You're in a dark cave. It is pitch black but you
+ begin to feel your way around the room """,
     ' To the north of the room you find a key hole.')
 
 Lake = Room(
     'Lake of Dreams',
     1,
-    'You walk into a dimly lit cavern. In the center is a glowing blue lake. On the wall there is a lit Torch.',
+    """You walk into a dimly lit cavern.
+ In the center is a glowing blue lake.
+ On the wall there is a lit Torch.""",
 )
 
 Abandoned_forge = Room(
-    'Abandoned Forge', 2,
-    'You walk into a new room. It appears to be an old forge with old will forging equipment and an anvil. '
-    'there is a thin been of light coming into the room from a man made hole in the ceiling. In the corner there is a barrel of coal.'
-)
+    'Abandoned Forge', 2, """You walk into a new room.
+ It appears to be an old forge with old will forging equipment and an anvil.
+There is a thin been of light coming into the room
+ from a man made hole in the ceiling.
+ In the corner there is a barrel of coal.""")
 
 # Level 2
 Crossroads = Room(
-  'Crossroads', 3,
-  'you find yourself at a crossroads in the mountains. There are three paths infront of you. One leads west down into a dark sprawlling forest. Another track to the east winds up high into the mountains. The last path leads down to a small hamlet far bellow you.',
+    'Crossroads',
+    3,
+    """you find yourself at a crossroads in the mountains.
+ There are three paths infront of you.
+ One leads west down into a dark sprawlling forest. Another track to the east winds
+ up high into the mountains.
+ The last path leads down to a small hamlet far bellow you.""",
 )
 
 Atvust = Room(
-  'Atvust', 4,
-  'you enter the village of Avust. As you walk down the narrow but clean streets the sounds of merriment begin to surround you. Soon you come to the main square to the west there is a tavern and to the east there is a market.'
+    'Atvust', 4, """you enter the village of Avust.
+ As you walk down the narrow but clean streets the sounds of merriment begin to surround you.
+ Soon you come to the main square to the west there is a tavern and to the east there is a market. In the gutter you see a bag of coins glinting in the sunlight."""
 )
 
 Mountaintop = Room(
-  'Mountaintop', 5,
-  ''
+    'Mountaintop', 5,
+    """As you crest the peak of the icy mountain the land stretches out far below you. Below you, a village can be seen in the distance as well as a dark sprawling forrest. There is a magical presence here."""
 )
 
 Forest_entrance = Room(
-  'Forest Entrance', 6,
-  'You are unerved by the forrest as if the is an evil presense here. In the future there will be something here.'
+    'Forest Entrance', 6,
+    """You are unerved by the forrest as if the is an evil presense here. In the future there will be something here."""
 )
 
 Atvust_Market = Room(
-  'Market', 7,
-  'The small market you are now presented with is surprisingly lively. All around you villagers are haggling with merchants from the outer dales. Sitting quietly at one of the stands at the far end of the market is a wizard.'
+    'Market', 7,
+    """The small market you are now presented with is surprisingly lively. All around you villagers are haggling with merchants from the outer dales.Sitting quietly at one of the stands at the far end of the market is a wizard."""
 )
 
 Atvust_Tavern = Room(
-  'Tavern',8 ,
-  'The smell of hearty ale wafts towards you as you enter the Tavern. Once you are inside you see many people of the town including several arcinthian dwarves drinking and sining merrily. behind the bar you see the Landlord cleaning an tankard. '
-)
+    'Tavern', 8,
+    """The smell of hearty ale wafts towards you as you enter the Tavern.
+ Once you are inside you see many people of the town including several Arcinthian Dwarves drinking and sining merrily.
+ Behind the bar you see the Landlord cleaning an tankard.
+ """)
+
 # Setting up room exits
+# each room can have four exits
 Dark_Room.Exits = {"north": Crossroads, "east": Abandoned_forge, "west": Lake}
 Lake.Exits = {"east": Dark_Room}
 Abandoned_forge.Exits = {"west": Dark_Room}
-Crossroads.Exits = {"north": Atvust, "south": Dark_Room, "east": Mountaintop, "west": Forest_entrance}
-Atvust.Exits = {"south": Crossroads, "west": Atvust_Tavern, "east": Atvust_Market}
+Crossroads.Exits = {
+    "north": Atvust,
+    "south": Dark_Room,
+    "east": Mountaintop,
+    "west": Forest_entrance
+}
+Atvust.Exits = {
+    "south": Crossroads,
+    "east": Atvust_Market,
+    "west": Atvust_Tavern
+}
 Mountaintop.Exits = {"west": Crossroads}
 Forest_entrance.Exits = {"east": Crossroads}
 Atvust_Market.Exits = {"west": Atvust}
@@ -176,6 +216,11 @@ Dark_Room.hidden_exits = ["north"]
 Dark_Room.contents = []
 Lake.contents = [Torch]
 Abandoned_forge.contents = [CoalBarrel, Key]
+Atvust.contents = [CoinBag]
+Mountaintop.contents = []
+Forest_entrance = []
+Atvust_Market = []
+Atvust_Tavern = []
 
 
 class main:
@@ -183,8 +228,11 @@ class main:
     # the room the player is in
     current_room = Dark_Room
 
-    # responce
+    # responce to player action
     responce = ''
+
+    # text for an event which has occured
+    event = ''
 
     pygame.display.set_caption('The Wills of Men')
 
@@ -224,11 +272,13 @@ class main:
             text_surface = BASE_FONT.render(input_text, True, (255, 255, 255))
             DISPLAY.blit(text_surface, (10, WINHIEGHT - 32))
 
-            set_description()
-            set_title()
-            main.render_responcetext()
+            # all the information the player needs to see is rendered here
+            render_title()
+            render_description()
+            render_inventory()
 
-            display_inventory()
+            render_event()
+            render_responcetext()
 
             pygame.display.flip()
             CLOCK.tick(60)
@@ -239,7 +289,7 @@ class main:
         # splits the input text string into an arrary of strings
         split_input = input_text.split()
 
-        if split_input in ([''],[],[' ']):
+        if split_input in ([''], [], [' ']):
             pass
 
         # checks the first word against a list of actions
@@ -248,14 +298,18 @@ class main:
 
             direction = cls.current_room.change(split_input[1])
 
-          
             if direction:
 
                 cls.responce = f'you go {direction}'
 
+                if cls.event == cls.current_room.exploreText:
+                    cls.current_room.description += cls.current_room.exploreText
+
+                cls.event = ''
+
                 # sets the playrs current room to the new room
-                save(cls.current_room.Id)
                 cls.current_room = cls.current_room.Exits[direction]
+                save(cls.current_room.Id)
 
             else:
                 cls.responce = 'I dont understand'
@@ -268,18 +322,18 @@ class main:
 
                     if not item.hidden:
 
-                        Inventory.additem(item)
+                        Inventory.add_item(item)
                         cls.responce = f'you get the {item.name}'
-                        cls.current_room.removeitem(item)
+                        cls.current_room.remove_item(item)
                         save(cls.current_room.Id)
 
         elif "explore" == split_input[0]:
             if Torch in Inventory.contents:
-                cls.responce = f'you look around.{cls.current_room.exploreText}'
+                cls.responce = f'you look around.'
 
-                if cls.current_room.exploreText != ' you find nothing of note': 
-                  cls.current_room.description += cls.current_room.exploreText
-                  
+                if cls.current_room.exploreText != ' you find nothing of note':
+                    main.event = cls.current_room.exploreText
+
                 cls.current_room.hidden_exits = []
 
                 save(cls.current_room.Id)
@@ -288,15 +342,11 @@ class main:
             for item in Inventory.contents:
 
                 if split_input[1] in item.name.lower():
-
                     item.usage()
 
         elif "save" == split_input[0]:
             save(cls.current_room.Id)
             cls.responce = 'you save'
-
-        elif "load" == split_input[0]:
-             cls.current_room = load()
 
         elif "quit" == split_input[0]:
             pygame.quit()
@@ -305,17 +355,10 @@ class main:
         else:
             cls.responce = 'I dont understand'
 
-    @classmethod
-    def render_responcetext(cls):
-
-        responce_surface = BASE_FONT.render(cls.responce, True,
-                                            (255, 255, 255))
-
-        DISPLAY.blit(responce_surface, (10, WINHIEGHT - 57))
 
 if __name__ == "__main__":
 
-    set_title()
+    render_title()
 
     Homescreen.loop()
     if Homescreen.donext == 'load':

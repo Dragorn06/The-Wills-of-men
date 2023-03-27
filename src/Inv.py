@@ -3,9 +3,9 @@ class Inventory:
     contents = []
 
     @classmethod
-    def additem(cls, item):
+    def add_item(cls, item):
         cls.contents.append(item)
 
     @classmethod
-    def removeItem(cls, item):
+    def remove_item(cls, item):
         cls.contents.remove(item)

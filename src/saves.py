@@ -4,6 +4,8 @@ from .Inv import Inventory
 from .Rooms import Room
 from .Items import Item
 
+
+# a save function
 def save(currentRoom):
 
     with open('saves/save.json', 'w', encoding='utf-8') as saveFile:
@@ -35,6 +37,7 @@ def save(currentRoom):
         saveFile.close()
 
 
+# a load function
 def load():
 
     with open('saves/save.json', 'r', encoding='utf-8') as saveFile:
@@ -52,6 +55,8 @@ def load():
 
                 roomData = allRoomData[f'{obj.Id}']
                 contents = roomData['Contents']
+
+                print(contents)
 
                 obj.locked_exits = roomData['Locked exits']
                 obj.hidden_exits = roomData['Hidden exits']
