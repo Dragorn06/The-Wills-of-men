@@ -1,3 +1,7 @@
+"""
+A file containing constants used by the whole game
+"""
+
 import pygame
 
 pygame.init()

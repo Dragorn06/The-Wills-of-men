@@ -1,9 +1,14 @@
-import pygame
+"""
+This file acts almost as its own program functioning as a homescreen for the game
+"""
+
 import sys
+import pygame
 from .constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY, BASE_FONT, FANCY_FONT
 
 
 class Homescreen:
+    """The homescreen class which renders the homescreen and takes some limmited input"""
 
     SMALL_FONT_1 = pygame.font.Font('src/fonts/antiquity-print.ttf', 16)
     SMALL_FONT_2 = pygame.font.Font('src/fonts/BitPotionExt.ttf', 24)
@@ -25,6 +30,7 @@ class Homescreen:
 
     @classmethod
     def loop(cls):
+        """A small loop which allows the homescreen to render in real time"""
         while True:
 
             DISPLAY.fill((0, 0, 0))
