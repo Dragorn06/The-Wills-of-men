@@ -305,6 +305,10 @@ class Main:
     def action(cls, input_text):
         """Takes a players input"""
 
+        # pylint: disable=too-many-branches
+        # currently this number of branches is needed
+        # in the future this may change
+
         # splits the input text string into an arrary of strings
         split_input = input_text.split()
 
@@ -328,7 +332,7 @@ class Main:
 
                 # sets the playrs current room to the new room
                 cls.current_room = cls.current_room.exits[direction]
-                save(cls.current_room.Id)
+                save(cls.current_room.room_id)
 
             else:
                 cls.responce = 'I dont understand'

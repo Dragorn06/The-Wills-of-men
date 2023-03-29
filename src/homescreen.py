@@ -23,7 +23,8 @@ class Homescreen:
     title = FANCY_FONT.render("THE WILLS OF MEN", True, (255, 255, 255))
 
     title_rect = title.get_rect(center=(WINWIDTH // 2, WINHIEGHT // 2))
-    made_by_rect = made_by.get_rect(center=(WINWIDTH // 2, WINHIEGHT // 2 + 32))
+    made_by_rect = made_by.get_rect(
+        center=(WINWIDTH // 2, WINHIEGHT // 2 + 32))
     prompt_rect = prompt.get_rect(center=(WINWIDTH // 2, WINHIEGHT // 2 + 128))
 
     center_y = title_rect.y
@@ -33,43 +34,26 @@ class Homescreen:
         """A small loop which allows the homescreen to render in real time"""
         while True:
 
-            DISPLAY.fill((0, 0, 0))
-
             for event in pygame.event.get():
 
-                if event.type == pygame.QUIT:
-
-                    pygame.quit()
-                    sys.exit()
-
-                elif event.type == pygame.KEYDOWN:
+                if event.type == pygame.KEYDOWN:
 
                     if event.key == pygame.K_BACKSPACE:
 
                         cls.input_text = cls.input_text[:-1]
 
                     elif event.key == pygame.K_RETURN:
-
-                        if cls.input_text == "start":
-                            cls.input_text = ''.lower()
-                            cls.donext = "start"
-                            continue
-
-                        if cls.input_text == "load":
-                            cls.input_text = ''.lower()
-                            cls.donext = 'load'
-                            break
-
-                        if cls.input_text == "quit":
-                            cls.input_text = ''.lower()
-                            pygame.quit()
-                            sys.exit()
-
-                        cls.input_text = ''.lower()
+                        cls.action()
 
                     else:
                         cls.input_text += event.unicode
 
+                elif event.type == pygame.QUIT:
+
+                    pygame.quit()
+                    sys.exit()
+
+            DISPLAY.fill((0, 0, 0))
             # Rendering the players input as it is typed
             text_surface = BASE_FONT.render(cls.input_text, True,
                                             (255, 255, 255))
@@ -84,3 +68,21 @@ class Homescreen:
 
             if cls.donext is not None:
                 break
+
+    @classmethod
+    def action(cls):
+        """does an action based on the input"""
+        if cls.input_text == "start":
+            cls.input_text = ''.lower()
+            cls.donext = "start"
+
+        if cls.input_text == "load":
+            cls.input_text = ''.lower()
+            cls.donext = 'load'
+
+        if cls.input_text == "quit":
+            cls.input_text = ''.lower()
+            pygame.quit()
+            sys.exit()
+
+        cls.input_text = ''.lower()

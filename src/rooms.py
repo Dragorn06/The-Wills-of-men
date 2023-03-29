@@ -2,8 +2,12 @@
 The basic structure of a room is defined here
 """
 
+
 class Room():
     """A blue print for a room the player can interact with"""
+
+    # pylint: disable=too-many-instance-attributes
+    # 8 are necassery to ach
 
     change_room = True
 
@@ -30,13 +34,14 @@ class Room():
             if direction not in self.locked_exits:
                 return direction
 
+            return None
+        return None
+
     def remove_item(self, item):
         """Removes an item from the rooms contents"""
         self.contents.remove(item)
 
         self.description = self.description.replace(item.description, '')
-
-        return 0
 
     def add_item(self, item):
         """Adds an item to the room's contents"""
@@ -45,17 +50,3 @@ class Room():
             self.contents.append(item)
 
         self.description += item.description
-
-    def data(self):
-        """A debug function which prints the rooms data """
-        conts = []
-        for item in self.contents:
-            conts.append(item.Id)
-
-        return {
-            "Name": self.name,
-            "Description": self.description,
-            "Contents": conts,
-            "Hidden exits": self.hidden_exits,
-            "Locked exits": self.locked_exits
-        }
