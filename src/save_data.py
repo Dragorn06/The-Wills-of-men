@@ -14,12 +14,12 @@ def save(current_room):
     """Writes save data to the save file"""
 
     with open('saves/save.json', 'w', encoding='utf-8') as save_file:
-        inv = []
+        saved_inventory = []
         room_data = {}
         item_data = {}
 
         for item in Inventory.contents:
-            inv.append(item.Id)
+            saved_inventory.append(item.item_id)
 
         for obj in gc.get_objects():
             if isinstance(obj, Room):
@@ -31,7 +31,7 @@ def save(current_room):
         json.dump(
             {
                 "current room": current_room,
-                "Inventory": inv,
+                "Inventory": saved_inventory,
                 "Rooms": room_data,
                 "Items": item_data
             },
@@ -49,40 +49,36 @@ def load():
     with open('saves/save.json', 'r', encoding='utf-8') as save_file:
         load_data = json.load(save_file)
 
-        room_id = load_data['current room']
-        all_room_data = load_data['Rooms']
-        all_item_data = load_data['Items']
-        inv = load_data['Inventory']
+        # loads the players Inventory
+        for item in gc.get_objects():
+          if isinstance(item, Item):
+            if item.item_id in load_data["Inventory"]:
+              Inventory.add_item(item)
 
-        for obj in gc.get_objects():
-            if isinstance(obj, Room):
+        # loops through each room and substitutes the saved data into the room's data
+        for room in gc.get_objects():
+            if isinstance(room, Room):
 
-                obj.contents = []
+                room.description = load_data["Rooms"][f"{room.room_id}"][
+                    "Description"]
+                room_contents = load_data["Rooms"][f"{room.room_id}"][
+                    "Contents"]
+                room.hidden_exits = load_data["Rooms"][f"{room.room_id}"][
+                    "Hidden exits"]
+                room.locked_exits = load_data["Rooms"][f"{room.room_id}"][
+                    "Locked exits"]
 
-                room_data = all_room_data[f'{obj.room_id}']
-                contents = room_data['Contents']
+                room.contents = []
 
-                print(contents)
+                for item in gc.get_objects():
+                    if isinstance(item, Item):
+                        if item.item_id in room_contents:
+                            room.contents.append(item)
 
-                obj.locked_exits = room_data['Locked exits']
-                obj.hidden_exits = room_data['Hidden exits']
-                obj.description = room_data['Description']
+                        item.hidden = load_data["Items"][f"{item.item_id}"]["Is Hidden"]
 
-                if obj.room_id == room_id:
-                    current_room = obj
-
-        for obj in gc.get_objects():
-            if isinstance(obj, Item):
-
-                if obj.item_id in contents:
-                    obj.contents.append(obj)
-
-                elif obj.item_id in inv:
-                    Inventory.contents.append(obj)
-
-                item_data = all_item_data[f'{obj.item_id}']
-
-                obj.hidden = item_data['Is Hidden']
+                if room.room_id == load_data["current room"]:
+                    current_room = room
 
         save_file.close()
         return current_room

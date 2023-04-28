@@ -1,8 +1,9 @@
 {
-    "current room": 4,
+    "current room": 6,
     "Inventory": [
         0,
-        3
+        4,
+        5
     ],
     "Rooms": {
         "0": {
@@ -35,35 +36,35 @@
         },
         "4": {
             "Name": "Atvust",
-            "Description": "you enter the village of Avust.\n As you walk down the narrow but clean streets the sounds of merriment begin to surround you.\n Soon you come to the main square to the west there is a tavern and to the east there is a market. ",
+            "Description": "you enter the village of Avust.\n As you walk down the narrow but clean streets the sounds of merriment begin to surround you.\n Soon you come to the main square to the west there is a tavern and to the east there is a market. \n ",
             "Contents": [],
             "Hidden exits": [],
             "Locked exits": []
         },
         "5": {
             "Name": "Mountaintop",
-            "Description": "As you crest the peak of the icy mountain the land stretches out far below you. Below you, a village can be seen in the distance as well as a dark sprawling forrest. There is a magical presence here.",
+            "Description": "As you crest the peak of the icy mountain the land stretches out far below you. \nBelow you, a village can be seen in the distance as well as a dark sprawling forrest. \nThere is a magical presence here. ",
             "Contents": [],
             "Hidden exits": [],
             "Locked exits": []
         },
         "6": {
             "Name": "Forest Entrance",
-            "Description": "You are unerved by the forrest as if the is an evil presense here. In the future there will be something here.",
+            "Description": "You have finished The Wills of Men v0.3.0",
             "Contents": [],
             "Hidden exits": [],
             "Locked exits": []
         },
         "7": {
             "Name": "Market",
-            "Description": "The small market you are now presented with is surprisingly lively. All around you villagers are haggling with merchants from the outer dales.Sitting quietly at one of the stands at the far end of the market is a wizard.",
+            "Description": "The small market you are now presented with is surprisingly lively. \nAll around you villagers are haggling with merchants from the outer dales. \nSitting quietly at one of the stands at the far end of the market is a wizard. ",
             "Contents": [],
             "Hidden exits": [],
             "Locked exits": []
         },
         "8": {
             "Name": "Tavern",
-            "Description": "The smell of hearty ale wafts towards you as you enter the Tavern.\n Once you are inside you see many people of the town including several Arcinthian Dwarves drinking and sining merrily.\n Behind the bar you see the Landlord cleaning an tankard.\n ",
+            "Description": "The smell of hearty ale wafts towards you as you enter the Tavern.\n Once you are inside you see many people of the town including \n several Arcinthian Dwarves drinking and sining merrily.\n Behind the bar you see the Landlord cleaning an tankard.\n ",
             "Contents": [],
             "Hidden exits": [],
             "Locked exits": []
@@ -84,6 +85,14 @@
         },
         "3": {
             "Name": "Bag of Coins",
+            "Is Hidden": false
+        },
+        "4": {
+            "Name": "Magic Scroll",
+            "Is Hidden": false
+        },
+        "5": {
+            "Name": "Sword",
             "Is Hidden": false
         }
     }

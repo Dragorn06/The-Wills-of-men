@@ -7,7 +7,7 @@ class Room():
     """A blue print for a room the player can interact with"""
 
     # pylint: disable=too-many-instance-attributes
-    # 8 are necassery to ach
+    # 8 are necassery to achieve full functionality
 
     change_room = True
 
@@ -21,6 +21,7 @@ class Room():
         self.description = description  # the description fo the room the player is shown
         self.explore_text = explore_text
         self.contents = []  # any items in the room
+        self.npcs = [] # npcs which are in the room
         self.exits = {}  # any exits the room has
         self.hidden_exits = [
         ]  # any exits which are hidden - found with "explore"
@@ -50,3 +51,17 @@ class Room():
             self.contents.append(item)
 
         self.description += item.description
+
+    def data(self):
+        """returns all the room's data"""
+        conts = []
+        for item in self.contents:
+            conts.append(item.item_id)
+
+        return {
+            "Name": self.name,
+            "Description": self.description,
+            "Contents": conts,
+            "Hidden exits": self.hidden_exits,
+            "Locked exits": self.locked_exits
+        }

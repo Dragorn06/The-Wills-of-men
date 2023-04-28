@@ -14,7 +14,7 @@ class Item():
         self.hidden = False
 
     def debug(self):
-        """a debug class which returns the rooms data"""
+        """a debug class which returns the item's data"""
 
         return {
             "Name": self.name,
