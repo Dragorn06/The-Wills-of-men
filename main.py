@@ -1,392 +1,465 @@
+"""
+The Wills of Men
+by Dragorn 06
+
+a text adventure game
+"""
+
+# general imports
+import textwrap
 import sys
-import json
-import time as t
-from os import system, name
-from colorama import Fore as f
-from colorama import Style as s
+import pygame
 
-# all possible save data
-data = {
-    'Room': 0,
-    'fe1': 1,
-    'fe2': 1,
-    'fe3': 1,
-    'has_key': 0,
-    'door_found': 0,
-    'torch': 0,
-    'coal_bucket': 0
+# importing other parts of the game
+from src.inventory import Inventory
+from src.items import Item
+from src.rooms import Room
+from src.npcs import Npc
+from src.homescreen import Homescreen
+from src.save_data import save, load
+from src.constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY
+from src.constants import BASE_FONT, FANCY_FONT
+
+# initialising pygame
+pygame.init()
+
+# rendering functions
+
+
+def render_title():
+    """Renders the title at the top of the page"""
+
+    title = FANCY_FONT.render(Main.current_room.name, True, (255, 255, 255))
+
+    title_rect = title.get_rect(center=(WINWIDTH // 2, 20))
+
+    DISPLAY.blit(title, title_rect)
+
+
+def render_description():
+    """Renders the current room's description"""
+
+    description_y = 50
+
+    for line in textwrap.wrap(Main.current_room.description, 30):
+
+        description_surface_line = BASE_FONT.render(line, True,
+                                                    (255, 255, 255))
+
+        DISPLAY.blit(description_surface_line, (12, description_y))
+
+        description_y += 15
+
+
+def render_inventory():
+    """Renders the contents of the players inventory in a list"""
+
+    inventory_y = 50
+
+    for item in Inventory.contents:
+
+        item_surface_i = BASE_FONT.render(item.name, True, (255, 255, 255))
+
+        DISPLAY.blit(item_surface_i,
+                     (WINWIDTH - (WINWIDTH / 3) + 2, inventory_y))
+
+        inventory_y += 15
+
+
+def render_event():
+    """Renders any events that occur. These can be triggered by item uses"""
+
+    event_y_offset = 0
+
+    for line in textwrap.wrap(Main.event, 40):
+
+        event_surface = BASE_FONT.render(line, True, (255, 255, 255))
+
+        event_rect = event_surface.get_rect(
+            center=(WINWIDTH // 2,
+                    WINHIEGHT - (WINHIEGHT // 3) + event_y_offset))
+
+        DISPLAY.blit(event_surface, event_rect)
+
+        event_y_offset += 15
+
+
+def render_responcetext():
+    """Renders the one line responce that the player is given"""
+
+    responce_surface = BASE_FONT.render(Main.responce, True, (255, 255, 255))
+
+    DISPLAY.blit(responce_surface, (10, WINHIEGHT - 57))
+
+
+# creating items
+Torch = Item('Torch', 0, ' On the wall there is a lit Torch.')
+CoalBarrel = Item('Barrel of coal', 1,
+                  ' In the corner there is a barrel of coal.')
+Key = Item('Rusty key', 2, '')
+CoinBag = Item(
+    'Bag of Coins', 3,
+    'In the gutter you see a bag of coins glinting in the sunlight.')
+MagicScroll = Item('Magic Scroll', 4,
+                   'Behind a pebble you can see a scroll sticking out')
+Sword = Item("Sword", 5, "")
+
+# Hidding items
+Key.hidden = True
+
+# Iem usages
+'''
+first word - level item is used in e.g. l1 is used in level 1
+second word - what it does
+'''
+
+
+def l1_light_forge():
+    """Lights the forge in the Abandoned forge"""
+    if Main.current_room == Abandoned_forge:
+        if Torch in Inventory.contents and CoalBarrel in Inventory.contents:
+
+            Main.responce = "you light the forge with the torch and coal."
+
+            Main.event = "Suddenly a key appears on the anvil"
+
+            Key.description = 'There is a Rusty key on the anvil'
+            Key.hidden = False
+
+            Main.current_room.add_item(Key)
+
+            Inventory.remove_item(CoalBarrel)
+
+
+def l1_open_door():
+    """opens the door in the dark room"""
+    if Main.current_room == Dark_Room:
+        if "north" not in Dark_Room.hidden_exits:
+
+            Main.responce = "you open the door"
+            Main.current_room.locked_exits.remove("north")
+            Inventory.remove_item(Key)
+
+
+def l2_buy_sword():
+    """buys the sword in the market"""
+    if Main.current_room == Atvust_Market:
+        if CoinBag in Inventory.contents:
+
+            Main.responce = "you buy the sword"
+            Main.event = "'Here the sword is yours!'"
+            Inventory.add_item(Sword)
+            Inventory.remove_item(CoinBag)
+
+            Main.current_room.description = Main.current_room.description.replace(
+                "There is a sword for sale at one of the stalls", '')
+
+
+def l2_fight_bear():
+    """Fight the bear using the sword and the scroll"""
+    if Main.current_room == Forest_entrance:
+        if Sword in Inventory.contents and MagicScroll not in Inventory.contents:
+            Main.event = """You use your sword to take on the bear.
+            You fight valiantly but are forced to retreat"""
+        elif Sword in Inventory.contents and MagicScroll in Inventory.contents:
+            Main.event = """You use your sword to take on the bear.
+            The bear flails at you as if possed knocking your sword out of your hand!
+              In an instant you pull the magic scroll out of your satchel,
+                you read the words incribed on it and in a great blaze of fire
+                  the bear is annihilated."""
+            # This line will be used in future versions
+            # Main.current_room.description = Main.current_room.description.replace("
+            # Suddenly a bear jumps out infront of you blocking the way.","")
+
+            Main.current_room.description = "You have finished The Wills of Men v0.3.0"
+            MagicScroll.usage = None
+            Sword.usage = None
+
+# assigning usages to items
+Torch.usage = l1_light_forge
+CoalBarrel.usage = l1_light_forge
+Key.usage = l1_open_door
+CoinBag.usage = l2_buy_sword
+MagicScroll.usage = l2_fight_bear
+Sword.usage = l2_fight_bear
+
+# creating npcs
+Wizard = Npc(
+    "Wizard", 0, MagicScroll, "Hello strong of Will",
+    "I see you have found a magic scroll. Use it, but be careful. They can be firey at times!"
+)
+Landlord = Npc("Landlord", 1, Sword, "Welcome traveller! What'll it be?",
+               "If its a fight your looking for then head to the woods.")
+
+# creating rooms
+# Level 1
+Dark_Room = Room(
+    'Dark Room', 0, """You're in a dark cave. It is pitch black but you
+ begin to feel your way around the room """,
+    ' To the north of the room you find a key hole.')
+
+Lake = Room(
+    'Lake of Dreams',
+    1,
+    """You walk into a dimly lit cavern.
+ In the center is a glowing blue lake.
+ On the wall there is a lit Torch.""",
+)
+
+Abandoned_forge = Room(
+    'Abandoned Forge', 2, """You walk into a new room.
+ It appears to be an old forge with old will forging equipment and an anvil.
+There is a thin been of light coming into the room
+ from a man made hole in the ceiling.
+ In the corner there is a barrel of coal.""")
+
+# Level 2
+Crossroads = Room(
+    'Crossroads',
+    3,
+    """you find yourself at a crossroads in the mountains.
+ There are three paths infront of you.
+ One leads west down into a dark sprawlling forest. Another track to the east winds
+ up high into the mountains.
+ The last path leads down to a small hamlet far bellow you.""",
+)
+
+Atvust = Room(
+    'Atvust', 4, """you enter the village of Avust.
+ As you walk down the narrow but clean streets the sounds of merriment begin to surround you.
+ Soon you come to the main square to the west there is a tavern and to the east there is a market. 
+ In the gutter you see a bag of coins glinting in the sunlight.""")
+
+Mountaintop = Room(
+    'Mountaintop', 5,
+    """As you crest the peak of the icy mountain the land stretches out far below you. 
+Below you, a village can be seen in the distance as well as a dark sprawling forrest. 
+There is a magical presence here. Behind a pebble you can see a scroll sticking out"""
+)
+
+Forest_entrance = Room(
+    'Forest Entrance', 6,
+    """You are unerved by the forrest as if the is an evil presense here.
+      Suddenly a bear jumps out infront of you blocking the way."""
+)
+
+Atvust_Market = Room(
+    'Market', 7,
+    """The small market you are now presented with is surprisingly lively. 
+All around you villagers are haggling with merchants from the outer dales. 
+Sitting quietly at one of the stands at the far end of the market is a wizard.
+ There is a sword for sale at one of the stalls"""
+)
+
+Atvust_Tavern = Room(
+    'Tavern', 8,
+    """The smell of hearty ale wafts towards you as you enter the Tavern.
+ Once you are inside you see many people of the town including 
+ several Arcinthian Dwarves drinking and sining merrily.
+ Behind the bar you see the Landlord cleaning an tankard.
+ """)
+
+# Setting up room exits
+# each room can have four exits
+Dark_Room.exits = {"north": Crossroads, "east": Abandoned_forge, "west": Lake}
+Lake.exits = {"east": Dark_Room}
+Abandoned_forge.exits = {"west": Dark_Room}
+Crossroads.exits = {
+    "north": Atvust,
+    "south": Dark_Room,
+    "east": Mountaintop,
+    "west": Forest_entrance
 }
+Mountaintop.exits = {"west": Crossroads}
+Forest_entrance.exits = {"east": Crossroads}
+Atvust.exits = {
+    "south": Crossroads,
+    "east": Atvust_Market,
+    "west": Atvust_Tavern
+}
+Atvust_Market.exits = {"west": Atvust}
+Atvust_Tavern.exits = {"east": Atvust}
 
-# the homescreen the player is presented with
-def homescreen():
-    # tells us the the player is in room 0
-    global data
+# setting up locked exits
+Dark_Room.locked_exits = ["north"]
 
-    # title
-    print(f.BLUE + '------------------')
-    print(' The Wills of Men')
-    print('------------------' + s.RESET_ALL)
+# setting up hidden exits
+Dark_Room.hidden_exits = ["north"]
 
-    start_text = (
-        '\nType start to begin your adventure or load to countinue your adventure. Remember type save to save and quit '
-        'to quit at any point\n')
+# setting up the contents of rooms
+Dark_Room.contents = []
+Lake.contents = [Torch]
+Abandoned_forge.contents = [CoalBarrel, Key]
+Mountaintop.contents = [MagicScroll]
+Forest_entrance.contents = []
+Atvust.contents = [CoinBag]
+Atvust_Market.contents = []
+Atvust_Tavern.contents = []
 
-    for char in start_text:
-        sys.stdout.write(char)
-        sys.stdout.flush()
-        t.sleep(0.03)
+# assigning npcs to rooms
+Dark_Room.npcs = []
+Lake.npcs = []
+Abandoned_forge.npcs = []
+Mountaintop.npcs = []
+Forest_entrance.npcs = []
+Atvust.npcs = []
+Atvust_Market.npcs = [Wizard]
+Atvust_Tavern.npcs = [Landlord]
 
-    while True:
-        # recives and converts answer to lower case
-        answer = input("\n>").lower()
 
-        # checks for start command
-        if 'start' in answer:
+class Main:
+    """The main class containing player location data and the main game loop as well"""
 
-            # creates save data
-            with open('save.json', 'w') as save:
-                json.dump(data, save)
+    # the room the player is in
+    current_room = Dark_Room
 
-            print('\nIt Begins')
+    # responce to player action
+    responce = ''
 
-            t.sleep(4)
+    # text for an event which has occured
+    event = ''
 
-            clear()
+    pygame.display.set_caption('The Wills of Men')
 
-            # begins Room 1
-            start()
+    # main game loop
+    @classmethod
+    def game_loop(cls):
+        """The main game function. Renders all game content and registers player input"""
 
-        # checks for load command
-        elif 'load' in answer:
-            # tries to load a save
-            with open('save.json') as save:
-                data = json.load(save)
-            Room_Check()
+        input_text = ''.lower()
 
-        elif 'quit' in answer:
-            # asks the player i they want to save
-            print('do you want to save before quitting? y/n')
+        while True:
 
-            answer = input(">").lower()
+            DISPLAY.fill((0, 0, 0))
 
-            # if y saves the game and quits
-            if 'y' in answer:
-                print('exiting')
-                with open('save.json', 'w') as save:
-                    json.dump(data, save)
-                    exit()
+            for event in pygame.event.get():
 
-            elif 'n' in answer:
-              exit()
+                if event.type == pygame.QUIT:
 
+                    pygame.quit()
+                    sys.exit()
 
-# starting function
-def start():
+                elif event.type == pygame.KEYDOWN:
 
-    clear()
+                    if event.key == pygame.K_BACKSPACE:
 
-    # tells the code we are in room 1
-    data['Room'] = 1
+                        input_text = input_text[:-1]
 
-    # Room title
-    print(f.GREEN + 'DARK ROOM' + s.RESET_ALL)
+                    elif event.key == pygame.K_RETURN:
 
-    # prints this if you have been here before
-    if data['fe1'] == 0:
-        print(
-            "\nyou're back in the dark room, its pitch black but you can feel your way around"
-        )
+                        Main.action(input_text)
 
-    # checks if this is your first entry
-    if data['fe1'] == 1:
-        data['fe1'] = 0
+                        input_text = ''.lower()
 
-        with open('save.json', 'w') as save:
-            json.dump(data, save)
+                    else:
+                        input_text += event.unicode
 
-        t.sleep(1)
-        # Room outline
-        print(
-            '\nSuddenly you wake into a dark cave. its pitch black but you begin to feel your way around the room '
-        )
-        t.sleep(3)
-        print(
-            ' \nas you search you stumble two doors one to the left one to the right'
-        )
+            # Rendering the players input as it is typed
+            text_surface = BASE_FONT.render(input_text, True, (255, 255, 255))
+            DISPLAY.blit(text_surface, (10, WINHIEGHT - 32))
 
-    t.sleep(1)
-    # suggested commands
-    print(
-        '\n "go left" for left or "go right" for right or "explore" to explore some more'
-    )
+            # all the information the player needs to see is rendered here
+            render_title()
+            render_description()
+            render_inventory()
 
-    # Room 1 game loop
-    while True:
-
-        cmd_handler()
-
-
-# room 2's function
-def lake_room():
-    data['Room'] = 2
-
-    # clears page for new room
-    clear()
-
-    # room's title
-    print(f.GREEN + 'LAKE OF DREAMS' + s.RESET_ALL)
-
-    # checks if you have been here before
-    if data['fe2'] == 0:
-        print(
-            '\nyou re-enter the Lake of Dreams. You again see the iridescent lake'
-        )
-        if data['torch'] == 0:
-            print('On the wall there is an lit Torch with something behind it')
+            render_event()
+            render_responcetext()
 
-    if data['fe2'] == 1:
-        data['fe2'] = 0
+            pygame.display.flip()
+            CLOCK.tick(60)
 
-        t.sleep(1)
+    @classmethod
+    def action(cls, input_text):
+        """Takes a players input"""
 
-        # room outline
-        print(
-            '\nYou walk into a dimly lit cavern. in the center is a glowing blue lake which appears to glow. On the wall there is an lit Torch with something behind it '
-        )
-
-    # room game loop
-    while True:
-
-        cmd_handler()
-
-
-# room 3's function
-def abandoned_forge():
-    data['Room'] = 3
-
-    # clears page for new room
-    clear()
-
-    # rooms title
-    print(f.GREEN + 'ABANDONED FORGE' + s.RESET_ALL)
-    if data['fe3'] == 0:
-        print('you feel calm as you enter the forge')
+        # pylint: disable=too-many-branches
+        # currently this number of branches is needed
+        # in the future this may change
 
-        if data['coal_bucket'] == 0:
-            print('\nin the corner there is a barrel of coal')
-    if data['fe3'] == 1:
-        data['fe3'] = 0
-        t.sleep(1)
-
-        # room outline for player
-        print(
-            '\nYou walk into a new room. It appears to be an old forge with old will forging equipment and an anvil. '
-            'there is a thin been of light coming into the room from a man made hole in the ceiling. in the corner '
-            'there is a barrel of coal')
-
-    # Room 3 game loop
-    while True:
-
-        cmd_handler()
-
-
-# kills the player when triggered
-def game_over(reason):
-    # why the player is killed
-    print(reason)
-    t.sleep(1)
-    print('\nGAME OVER')
-
-
-# send the player to the previous room
-def go_back():
-    if data['Room'] == 1:
-        print('no')
-        start()
-    if data['Room'] == 2:
-        print('the dark room')
-        start()
-    if data['Room'] == 3:
-        print('the dark room')
-        start()
-
-
-# checks what room the player should be in and sends them there
-#checks what room th eplayer is in
-def Room_Check():
-    if data['Room'] == 1:
-        start()
-    elif data['Room'] == 2:
-        lake_room()
-    elif data['Room'] == 3:
-        abandoned_forge()
-    else:
-        # creates new game if no room can be found
-        print('failed to find load creating new game')
-        t.sleep(3)
-        start()
+        # splits the input text string into an arrary of strings
+        split_input = input_text.split()
 
+        if split_input in ([''], [], [' ']):
+            pass
 
-# clears the screen
-def clear():
-    # for windows
-    if name == 'nt':
-        _ = system('cls')
+        # checks the first word against a list of actions
+        elif "go" == split_input[0]:
+            # changes the room using the second word as an argument
 
-    # for mac and linux
-    else:
-        _ = system('clear')
+            direction = cls.current_room.change(split_input[1])
 
+            if direction:
 
-# handles all commands in the game
-def cmd_handler():
+                cls.responce = f'you go {direction}'
 
-    answer = input('\n>').lower()
+                if cls.event == cls.current_room.explore_text:
+                    cls.current_room.description += cls.current_room.explore_text
 
-    if 'go' in answer:
+                cls.event = ''
 
-        if data['Room'] == 1:
-            if 'left' in answer:
-                clear()
-                print('you go left')
-                t.sleep(3)
-                lake_room()
-            elif 'right' in answer:
-                clear()
-                print('you go right')
-                t.sleep(3)
-                abandoned_forge()
+                # sets the playrs current room to the new room
+                cls.current_room = cls.current_room.exits[direction]
+                save(cls.current_room.room_id)
 
-        elif data['Room'] == 2:
-            if 'back' in answer:
-                go_back()
+            else:
+                cls.responce = 'I dont understand'
 
-        elif data['Room'] == 3:
-            if 'back' in answer:
-                go_back()
+        elif "get" == split_input[0]:
 
-    elif 'get' in answer:
-
-        if data['Room'] == 1:
-            print('')
-
-        if data['Room'] == 2:
-            if 'torch' in answer:
-                # checks torch status
-                if data['torch'] == 0:
-                    # changes torch status
-                    data['torch'] = 1
-                    print('You grab the torch.')
-
-        if data['Room'] == 3:
-            if 'coal barrel' in answer:
-                if data['coal_bucket'] == 0:
-                    data['coal_bucket'] = 1
-                    print('you grab the bucket of coal')
-
-            if 'key' in answer:
-                if data['has_key'] == 0:
-                    data['has_key'] = 1
-                    print('You get the key from the anvil.')
-                    print('\nOn it there is an inscription .' + f.BLUE +
-                          '"The way to light is found in the darkest places"' +
-                          s.RESET_ALL)
-
-    elif 'open' in answer:
-
-        if data['Room'] == 1:
-            if 'open door' in answer:
-                # check if the playere has found the door and has the key
-                if data['has_key'] == 1 and data['door_found'] == 1:
-                    print(
-                        '\nThe door flies open and you are blinded by the light of the outside world'
-                    )
-
-                    t.sleep(10)
-
-                    clear()
-
-                    print(
-                        "\nYou've finished 0.2.1 of The Wills of Men. Thank you for playing!! "
-                    )
-
-                    t.sleep(10)
-
-                    with open('save.json', 'w') as save:
-                        json.dump(data, save)
-
-                        clear()
-
-                    homescreen()
-
-        if data['Room'] == 2:
-            print('')
-
-        if data['Room'] == 3:
-            print('')
-
-    elif 'light' in answer:
-
-        if data['Room'] == 1:
-            print('')
-
-        if data['Room'] == 2:
-            print('')
-
-        if data['Room'] == 3:
-            if 'forge' or 'fire' in answer:
-                if data['torch'] == 1 and data['coal_bucket'] == 1:
-                    t.sleep(2)
-                    print(
-                        '\nAs you place the coal in the forge and light the fire you feel a great increase in your power '
-                        + f.YELLOW + 'Somewhere you can feel a way outside' +
-                        s.RESET_ALL, )
-
-                    t.sleep(1)
-
-                    print('\na key materialises on the anvil')
-
-    elif 'explore' in answer:
-
-        if data['Room'] == 1:
-            if 'explore' in answer:
-                # if they have a torch they find something
-                if data['torch'] == 1:
-                    print(
-                        '\n you look around and find what appears to be a key hole in the wall'
-                    )
-                    data['door_found'] = 1
-
-        if data['Room'] == 2:
-            print('')
-
-        if data['Room'] == 3:
-            print('')
-    elif 'save' in answer:
-        with open('save.json', 'w') as save:
-            json.dump(data, save)
-            print('\nSaved!')
-
-    elif 'quit' in answer:
-        # asks the player i they want to save
-        print('do you want to save before quitting? y/n')
-
-        answer = input(">").lower()
-
-        # if y saves the game and quits
-        if 'y' in answer:
-            print('saving and exiting')
-            with open('save.json', 'w') as save:
-                json.dump(data, save)
-                exit()
-
-        elif 'n' in answer:
-            print('if you say so')
-            exit()
-
-    else:
-        print(f.RED + 'Syntax error' + s.RESET_ALL)
+            Main.current_room.data()
+
+            # checks items in a room against the players input
+            for item in Main.current_room.contents:
+                if split_input[1] in item.name.lower():
+                    if not item.hidden:
+
+                        Inventory.add_item(item)
+                        cls.responce = f'you get the {item.name}'
+                        cls.current_room.remove_item(item)
+                        save(cls.current_room.room_id)
+
+        elif "talk" == split_input[0]:
+            for npc in cls.current_room.npcs:
+                if split_input[1] in npc.name.lower():
+                    cls.event = npc.say_something()
+
+        elif "explore" == split_input[0]:
+            if Torch in Inventory.contents:
+
+                if cls.current_room.explore_text != ' you find nothing of note':
+                    Main.event = cls.current_room.explore_text
+
+                cls.current_room.hidden_exits = []
+
+                save(cls.current_room.room_id)
+
+        elif "use" == split_input[0]:
+            for item in Inventory.contents:
+
+                if split_input[1] in item.name.lower():
+                    if item.usage is not None:
+                        item.usage()
+
+        elif "save" == split_input[0]:
+            save(cls.current_room.room_id)
+            cls.responce = 'you save'
+
+        elif "quit" == split_input[0]:
+            pygame.quit()
+            sys.exit()
+
+        else:
+            cls.responce = "I don't understand"
 
 
 if __name__ == "__main__":
-    homescreen()
+
+    render_title()
+
+    Homescreen.loop()
+    if Homescreen.donext == 'load':
+        Main.current_room = load()
+    else:
+        pass
+    Main.game_loop()
