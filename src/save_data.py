@@ -51,9 +51,9 @@ def load():
 
         # loads the players Inventory
         for item in gc.get_objects():
-          if isinstance(item, Item):
-            if item.item_id in load_data["Inventory"]:
-              Inventory.add_item(item)
+            if isinstance(item, Item):
+                if item.item_id in load_data["Inventory"]:
+                    Inventory.add_item(item)
 
         # loops through each room and substitutes the saved data into the room's data
         for room in gc.get_objects():

@@ -156,14 +156,20 @@ def l2_buy_sword():
 
 
 def l2_fight_bear():
+    """Fight the bear using the sword and the scroll"""
     if Main.current_room == Forest_entrance:
         if Sword in Inventory.contents and MagicScroll not in Inventory.contents:
-            Main.event = "You use your sword to take on the bear. You fight valiantly but are forced to retreat"
-
+            Main.event = """You use your sword to take on the bear.
+            You fight valiantly but are forced to retreat"""
         elif Sword in Inventory.contents and MagicScroll in Inventory.contents:
-            Main.event = """You use your sword to take on the bear. The bear flails at you as if possed knocking your sword out of your hand! In an instant you pull the magic scroll out of your satchel, you read the words incribed on it and in a great blaze of fire the bear is annihilated."""
+            Main.event = """You use your sword to take on the bear.
+            The bear flails at you as if possed knocking your sword out of your hand!
+              In an instant you pull the magic scroll out of your satchel,
+                you read the words incribed on it and in a great blaze of fire
+                  the bear is annihilated."""
             # This line will be used in future versions
-            # Main.current_room.description = Main.current_room.description.replace(" Suddenly a bear jumps out infront of you blocking the way.","") 
+            # Main.current_room.description = Main.current_room.description.replace("
+            # Suddenly a bear jumps out infront of you blocking the way.","")
 
             Main.current_room.description = "You have finished The Wills of Men v0.3.0"
             MagicScroll.usage = None
@@ -233,14 +239,16 @@ There is a magical presence here. Behind a pebble you can see a scroll sticking 
 
 Forest_entrance = Room(
     'Forest Entrance', 6,
-    """You are unerved by the forrest as if the is an evil presense here. Suddenly a bear jumps out infront of you blocking the way."""
+    """You are unerved by the forrest as if the is an evil presense here.
+      Suddenly a bear jumps out infront of you blocking the way."""
 )
 
 Atvust_Market = Room(
     'Market', 7,
     """The small market you are now presented with is surprisingly lively. 
 All around you villagers are haggling with merchants from the outer dales. 
-Sitting quietly at one of the stands at the far end of the market is a wizard. There is a sword for sale at one of the stalls"""
+Sitting quietly at one of the stands at the far end of the market is a wizard.
+ There is a sword for sale at one of the stalls"""
 )
 
 Atvust_Tavern = Room(
@@ -430,8 +438,8 @@ class Main:
             for item in Inventory.contents:
 
                 if split_input[1] in item.name.lower():
-                  if item.usage != None:
-                      item.usage()
+                    if item.usage is not None:
+                        item.usage()
 
         elif "save" == split_input[0]:
             save(cls.current_room.room_id)
