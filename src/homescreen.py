@@ -16,7 +16,7 @@ class Homescreen:
     donext = None
     input_text = ''.lower()
 
-    made_by = SMALL_FONT_1.render("made by Dragorn06", True, (255, 255, 255))
+    made_by = SMALL_FONT_1.render("made by Dragorn06", False, (255, 255, 255))
     prompt = SMALL_FONT_2.render(
         'Type "start" to begin and "load" to load a save. To quit type "quit".',
         True, (255, 255, 255))

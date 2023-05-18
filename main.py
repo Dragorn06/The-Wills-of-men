@@ -1,7 +1,6 @@
 """
 The Wills of Men
 by Dragorn 06
-
 a text adventure game
 """
 
@@ -9,6 +8,7 @@ a text adventure game
 import textwrap
 import sys
 import pygame
+from inspect import signature
 
 # importing other parts of the game
 from src.inventory import Inventory
@@ -43,7 +43,7 @@ def render_description():
 
     for line in textwrap.wrap(Main.current_room.description, 30):
 
-        description_surface_line = BASE_FONT.render(line, True,
+        description_surface_line = BASE_FONT.render(line, False,
                                                     (255, 255, 255))
 
         DISPLAY.blit(description_surface_line, (12, description_y))
@@ -58,7 +58,7 @@ def render_inventory():
 
     for item in Inventory.contents:
 
-        item_surface_i = BASE_FONT.render(item.name, True, (255, 255, 255))
+        item_surface_i = BASE_FONT.render(item.name, False, (255, 255, 255))
 
         DISPLAY.blit(item_surface_i,
                      (WINWIDTH - (WINWIDTH / 3) + 2, inventory_y))
@@ -73,7 +73,7 @@ def render_event():
 
     for line in textwrap.wrap(Main.event, 40):
 
-        event_surface = BASE_FONT.render(line, True, (255, 255, 255))
+        event_surface = BASE_FONT.render(line, False, (255, 255, 255))
 
         event_rect = event_surface.get_rect(
             center=(WINWIDTH // 2,
@@ -87,9 +87,9 @@ def render_event():
 def render_responcetext():
     """Renders the one line responce that the player is given"""
 
-    responce_surface = BASE_FONT.render(Main.responce, True, (255, 255, 255))
+    responce_surface = BASE_FONT.render(Main.responce, False, (255, 255, 255))
 
-    DISPLAY.blit(responce_surface, (10, WINHIEGHT - 57))
+    DISPLAY.blit(responce_surface, (WINWIDTH // 48, WINHIEGHT - 57))
 
 
 # creating items
@@ -167,13 +167,15 @@ def l2_fight_bear():
               In an instant you pull the magic scroll out of your satchel,
                 you read the words incribed on it and in a great blaze of fire
                   the bear is annihilated."""
-            # This line will be used in future versions
-            # Main.current_room.description = Main.current_room.description.replace("
-            # Suddenly a bear jumps out infront of you blocking the way.","")
+
+            Main.current_room.description = Main.current_room.description.replace(
+                "Suddenly a bear jumps out infront of you blocking the way.",
+                "")
 
             Main.current_room.description = "You have finished The Wills of Men v0.3.0"
             MagicScroll.usage = None
             Sword.usage = None
+
 
 # assigning usages to items
 Torch.usage = l1_light_forge
@@ -240,16 +242,14 @@ There is a magical presence here. Behind a pebble you can see a scroll sticking 
 Forest_entrance = Room(
     'Forest Entrance', 6,
     """You are unerved by the forrest as if the is an evil presense here.
-      Suddenly a bear jumps out infront of you blocking the way."""
-)
+      Suddenly a bear jumps out infront of you blocking the way.""")
 
 Atvust_Market = Room(
     'Market', 7,
     """The small market you are now presented with is surprisingly lively. 
 All around you villagers are haggling with merchants from the outer dales. 
 Sitting quietly at one of the stands at the far end of the market is a wizard.
- There is a sword for sale at one of the stalls"""
-)
+ There is a sword for sale at one of the stalls""")
 
 Atvust_Tavern = Room(
     'Tavern', 8,
@@ -355,7 +355,7 @@ class Main:
                         input_text += event.unicode
 
             # Rendering the players input as it is typed
-            text_surface = BASE_FONT.render(input_text, True, (255, 255, 255))
+            text_surface = BASE_FONT.render(input_text, False, (255, 255, 255))
             DISPLAY.blit(text_surface, (10, WINHIEGHT - 32))
 
             # all the information the player needs to see is rendered here
@@ -370,87 +370,105 @@ class Main:
             CLOCK.tick(60)
 
     @classmethod
+    def go_direction(cls, split_input):
+        direction = cls.current_room.change(split_input[1])
+
+        if direction:
+
+            cls.responce = f'you go {direction}'
+
+            if cls.event == cls.current_room.explore_text:
+                cls.current_room.description += cls.current_room.explore_text
+
+            cls.event = ''
+
+            # sets the playrs current room to the new room
+            cls.current_room = cls.current_room.exits[direction]
+            save(cls.current_room.room_id)
+
+    @classmethod
+    def get_item(cls, split_input):
+        # checks items in a room against the players input
+        for item in cls.current_room.contents:
+            if split_input[1] in item.name.lower():
+                if not item.hidden:
+
+                    Inventory.add_item(item)
+                    cls.responce = f'you get the {item.name}'
+                    cls.current_room.remove_item(item)
+                    save(cls.current_room.room_id)
+
+    @classmethod
+    def talk_npc(cls, split_input):
+        for npc in cls.current_room.npcs:
+            if split_input[1] in npc.name.lower():
+                cls.event = npc.say_something()
+
+    @classmethod
+    def explore(cls):
+        if Torch in Inventory.contents:
+
+            if cls.current_room.explore_text != ' you find nothing of note':
+                cls.event = cls.current_room.explore_text
+
+            cls.responce = "you explore the room"
+
+            cls.current_room.hidden_exits = []
+
+            save(cls.current_room.room_id)
+
+    @classmethod
+    def use_item(cls, split_input):
+        for item in Inventory.contents:
+
+            if split_input[1] in item.name.lower():
+                if item.usage is not None:
+                    item.usage()
+
+    @classmethod
+    def save(cls):
+        save(cls.current_room.room_id)
+        cls.responce = 'you save'
+
+    @classmethod
+    def quit(cls):
+        pygame.quit()
+        sys.exit()
+
+    @classmethod
     def action(cls, input_text):
         """Takes a players input"""
-
-        # pylint: disable=too-many-branches
-        # currently this number of branches is needed
-        # in the future this may change
 
         # splits the input text string into an arrary of strings
         split_input = input_text.split()
 
-        if split_input in ([''], [], [' ']):
-            pass
-
         # checks the first word against a list of actions
-        elif "go" == split_input[0]:
-            # changes the room using the second word as an argument
+        actions = {
+            "go": cls.go_direction,
+            "get": cls.get_item,
+            "talk": cls.talk_npc,
+            "explore": cls.explore,
+            "use": cls.use_item,
+            "save": cls.save,
+            "quit": cls.quit,
+        }
 
-            direction = cls.current_room.change(split_input[1])
+        # if the input text is empty, the method does nothing
+        if not split_input:
+            cls.responce = "I don't understand"
+            return
 
-            if direction:
+        # if the first word is not in the list of actions, the method displays a message saying that the input text is not understood
+        if split_input[0] not in actions:
+            cls.responce = "I don't understand"
+            return
 
-                cls.responce = f'you go {direction}'
-
-                if cls.event == cls.current_room.explore_text:
-                    cls.current_room.description += cls.current_room.explore_text
-
-                cls.event = ''
-
-                # sets the playrs current room to the new room
-                cls.current_room = cls.current_room.exits[direction]
-                save(cls.current_room.room_id)
-
-            else:
-                cls.responce = 'I dont understand'
-
-        elif "get" == split_input[0]:
-
-            Main.current_room.data()
-
-            # checks items in a room against the players input
-            for item in Main.current_room.contents:
-                if split_input[1] in item.name.lower():
-                    if not item.hidden:
-
-                        Inventory.add_item(item)
-                        cls.responce = f'you get the {item.name}'
-                        cls.current_room.remove_item(item)
-                        save(cls.current_room.room_id)
-
-        elif "talk" == split_input[0]:
-            for npc in cls.current_room.npcs:
-                if split_input[1] in npc.name.lower():
-                    cls.event = npc.say_something()
-
-        elif "explore" == split_input[0]:
-            if Torch in Inventory.contents:
-
-                if cls.current_room.explore_text != ' you find nothing of note':
-                    Main.event = cls.current_room.explore_text
-
-                cls.current_room.hidden_exits = []
-
-                save(cls.current_room.room_id)
-
-        elif "use" == split_input[0]:
-            for item in Inventory.contents:
-
-                if split_input[1] in item.name.lower():
-                    if item.usage is not None:
-                        item.usage()
-
-        elif "save" == split_input[0]:
-            save(cls.current_room.room_id)
-            cls.responce = 'you save'
-
-        elif "quit" == split_input[0]:
-            pygame.quit()
-            sys.exit()
+        # calls the corresponding function for the first word of the input text
+        if str(signature(actions[split_input[0]])) != "()":
+            actions[split_input[0]](split_input)
 
         else:
-            cls.responce = "I don't understand"
+            actions[split_input[0]]()
 
 
 if __name__ == "__main__":
