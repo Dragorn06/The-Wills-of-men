@@ -1,5 +1,5 @@
 """
-Handles all the save data writing and reading form a JSON file
+Handles all the save data writing and reading from a JSON file
 """
 
 import gc

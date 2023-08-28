@@ -1,24 +1,26 @@
 """
 The Wills of Men
-by Dragorn 06
 a text adventure game
 """
 
+import gc
+import sys
 # general imports
 import textwrap
-import sys
+
 import pygame
-from inspect import signature
+
+from src.actions import noun, verb
+from src.constants import (BASE_FONT, CLOCK, DISPLAY, FANCY_FONT, WINHIEGHT,
+                           WINWIDTH)
+from src.homescreen import Homescreen
 
 # importing other parts of the game
 from src.inventory import Inventory
 from src.items import Item
-from src.rooms import Room
 from src.npcs import Npc
-from src.homescreen import Homescreen
-from src.save_data import save, load
-from src.constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY
-from src.constants import BASE_FONT, FANCY_FONT
+from src.rooms import Room
+from src.save_data import load, save
 
 # initialising pygame
 pygame.init()
@@ -65,6 +67,57 @@ def render_inventory():
 
         inventory_y += 15
 
+
+def render_verbs(mouse):
+    """Renders the verbs the player can use"""
+
+    verb_list = [v for v in gc.get_objects() if isinstance(v, verb)]
+
+    verb_list = [verb_list[x:x+3] for x in range(0, len(verb_list), 3)]
+
+    verb_x = WINWIDTH // 3
+    verb_y = WINHIEGHT - WINHIEGHT // 3
+
+    for sublist in verb_list:
+
+        for v in sublist:
+
+            verb_surface = FANCY_FONT.render(
+                f" {v.name} ", True, (255, 255, 255))
+            v.rect = verb_surface.get_rect(center=(verb_x, verb_y))
+
+            if v.rect.collidepoint(mouse) or v.clicked:
+                pygame.draw.rect(DISPLAY, (255, 255, 255),
+                                 v.rect, 2, border_radius=5)
+
+                render_nouns(v, mouse)
+
+            DISPLAY.blit(verb_surface, v.rect)
+
+            verb_y += 50
+
+        verb_y = WINHIEGHT - WINHIEGHT // 3
+        verb_x += 120
+
+
+def render_nouns(parent_verb, mouse):
+
+    noun_x = WINWIDTH - WINWIDTH // 3
+    noun_y = WINHIEGHT - WINHIEGHT // 3
+
+    for noun in parent_verb.nouns:
+
+        noun_surface = FANCY_FONT.render(
+            f" {noun.name} ", True, (255, 255, 255))
+        noun.rect = noun_surface.get_rect(center=(noun_x, noun_y))
+        
+        if noun.rect.collidepoint(mouse) or noun.clicked:
+            pygame.draw.rect(DISPLAY, (255, 255, 255),
+                             noun.rect, 2, border_radius=5)
+
+        DISPLAY.blit(noun_surface, noun.rect)
+
+        noun_y += 50
 
 def render_event():
     """Renders any events that occur. These can be triggered by item uses"""
@@ -195,6 +248,7 @@ Landlord = Npc("Landlord", 1, Sword, "Welcome traveller! What'll it be?",
 
 # creating rooms
 # Level 1
+
 Dark_Room = Room(
     'Dark Room', 0, """You're in a dark cave. It is pitch black but you
  begin to feel your way around the room """,
@@ -319,6 +373,8 @@ class Main:
     # text for an event which has occured
     event = ''
 
+    live_verb = None
+
     pygame.display.set_caption('The Wills of Men')
 
     # main game loop
@@ -328,9 +384,23 @@ class Main:
 
         input_text = ''.lower()
 
+        cls.assign_get_nouns()
+
+        cls.assign_examine_nouns()
+
+        cls.assign_talk_nouns()
+
+        clicked_verb = None
+        clicked_noun = None
+
         while True:
 
             DISPLAY.fill((0, 0, 0))
+
+            mouse = pygame.mouse.get_pos()
+
+            verbs = [s for s in gc.get_objects() if isinstance(s, verb)]
+            nouns = [s for s in gc.get_objects() if isinstance(s, noun)]
 
             for event in pygame.event.get():
 
@@ -339,29 +409,32 @@ class Main:
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.KEYDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    try:
+                        verb_collisions = [
+                            v for v in verbs if v.rect.collidepoint(mouse)]
+                        clicked_verb = verb_collisions[0]
+                    except:
+                        clicked_verb = None
 
-                    if event.key == pygame.K_BACKSPACE:
+                    try:
+                        noun_collisions = [
+                            n for n in nouns if n.rect.collidepoint(mouse) and n in cls.live_verb.nouns]
+                        clicked_noun = noun_collisions[0]
+                    except:
+                        clicked_noun = None
 
-                        input_text = input_text[:-1]
+                    cls.update_verbs(verbs, nouns, clicked_verb, clicked_noun)
 
-                    elif event.key == pygame.K_RETURN:
-
-                        Main.action(input_text)
-
-                        input_text = ''.lower()
-
-                    else:
-                        input_text += event.unicode
-
-            # Rendering the players input as it is typed
-            text_surface = BASE_FONT.render(input_text, False, (255, 255, 255))
-            DISPLAY.blit(text_surface, (10, WINHIEGHT - 32))
+                    clicked_verb = None
+                    clicked_noun = None
 
             # all the information the player needs to see is rendered here
             render_title()
             render_description()
             render_inventory()
+
+            render_verbs(mouse)
 
             render_event()
             render_responcetext()
@@ -370,42 +443,112 @@ class Main:
             CLOCK.tick(60)
 
     @classmethod
-    def go_direction(cls, split_input):
-        direction = cls.current_room.change(split_input[1])
+    def assign_get_nouns(cls):
+        get_noun_list = []
+        for i in cls.current_room.contents:
+            if not i.hidden:
+                item_noun_i = noun(f"{i.name}")
+                get_noun_list.append(item_noun_i)
 
-        if direction:
-
-            cls.responce = f'you go {direction}'
-
-            if cls.event == cls.current_room.explore_text:
-                cls.current_room.description += cls.current_room.explore_text
-
-            cls.event = ''
-
-            # sets the playrs current room to the new room
-            cls.current_room = cls.current_room.exits[direction]
-            save(cls.current_room.room_id)
+        get.nouns = get_noun_list
 
     @classmethod
-    def get_item(cls, split_input):
-        # checks items in a room against the players input
-        for item in cls.current_room.contents:
-            if split_input[1] in item.name.lower():
-                if not item.hidden:
+    def assign_examine_nouns(cls):
+        use_examine_list = []
+        for i in Inventory.contents:
+            use_examine_noun_i = noun(f"{i.name}")
+            use_examine_list.append(use_examine_noun_i)
 
-                    Inventory.add_item(item)
-                    cls.responce = f'you get the {item.name}'
-                    cls.current_room.remove_item(item)
+        use.nouns = use_examine_list
+        examine.nouns = use_examine_list
+
+    @classmethod
+    def assign_talk_nouns(cls):
+        talk_list = []
+        for n in cls.current_room.npcs:
+            npc_noun_n = noun(f"{n.name}")
+            talk_list.append(npc_noun_n)
+
+        talk.nouns = talk_list
+
+    @classmethod
+    def update_nouns(cls, nouns, verbs, clicked_noun, clicked_verb):
+        if clicked_noun:
+            clicked_noun.update()
+
+            return clicked_noun.name
+
+    @classmethod
+    def update_verbs(cls, verbs, nouns, clicked_verb, clicked_noun):
+        if clicked_verb:
+            print(clicked_verb.name)
+            clicked_verb.update()
+
+            cls.live_verb = clicked_verb
+
+            for v in [v for v in verbs if v is not clicked_verb]:
+
+                v.clicked = False
+        try:
+            print(f"clicked nouns: {clicked_noun.name}")
+        except:
+            print("no nouns clicked")
+        print(f"nouns: {[n.name for n in nouns]}")
+
+        arg = cls.update_nouns(nouns, verbs, clicked_noun, clicked_verb)
+
+        if arg:
+            for v in [v for v in verbs if v.clicked]:
+
+                v.action(arg)
+
+            for w in nouns + verbs:
+                w.reset()
+
+    @classmethod
+    def go_direction(cls, direction):
+        if direction in cls.current_room.exits:
+            if direction not in cls.current_room.hidden_exits+cls.current_room.locked_exits:
+                cls.responce = f'you go {direction}'
+
+                # sets the players current room to the new room
+                cls.current_room = cls.current_room.exits[direction]
+                save(cls.current_room.room_id)
+
+                cls.assign_get_nouns()
+
+                cls.assign_examine_nouns()
+
+                cls.assign_talk_nouns()
+
+            else:
+                cls.responce = f"you can't go that way"
+        else:
+            cls.responce = f"you can't go that way"
+
+    @classmethod
+    def get_item(cls, item):
+        # checks items in a room against the players input
+        for i in cls.current_room.contents:
+            if item == i.name:
+                print("True")
+                if not i.hidden:
+
+                    Inventory.add_item(i)
+                    cls.responce = f'you get the {item}'
+                    cls.current_room.remove_item(i)
+                    cls.assign_get_nouns()
+                    cls.assign_get_nouns()
                     save(cls.current_room.room_id)
 
-    @classmethod
-    def talk_npc(cls, split_input):
-        for npc in cls.current_room.npcs:
-            if split_input[1] in npc.name.lower():
-                cls.event = npc.say_something()
 
     @classmethod
-    def explore(cls):
+    def talk_npc(cls, npc):
+        for npc in cls.current_room.npcs:
+            if npc == npc.name:
+                cls.event = npc.say_something()
+
+#
         if Torch in Inventory.contents:
 
             if cls.current_room.explore_text != ' you find nothing of note':
@@ -418,12 +561,12 @@ class Main:
             save(cls.current_room.room_id)
 
     @classmethod
-    def use_item(cls, split_input):
-        for item in Inventory.contents:
+    def use_item(cls, item):
+        for i in Inventory.contents:
 
-            if split_input[1] in item.name.lower():
-                if item.usage is not None:
-                    item.usage()
+            if item in i.name:
+                if i.usage is not None:
+                    i.usage()
 
     @classmethod
     def save(cls):
@@ -435,41 +578,20 @@ class Main:
         pygame.quit()
         sys.exit()
 
-    @classmethod
-    def action(cls, input_text):
-        """Takes a players input"""
 
-        # splits the input text string into an arrary of strings
-        split_input = input_text.split()
+# creating nouns
+north = noun("north")
+south = noun("south")
+east = noun("east")
+west = noun("west")
 
-        # checks the first word against a list of actions
-        actions = {
-            "go": cls.go_direction,
-            "get": cls.get_item,
-            "talk": cls.talk_npc,
-            "explore": cls.explore,
-            "use": cls.use_item,
-            "save": cls.save,
-            "quit": cls.quit,
-        }
-
-        # if the input text is empty, the method does nothing
-        if not split_input:
-            cls.responce = "I don't understand"
-            return
-
-        # if the first word is not in the list of actions, the method displays a message saying that the input text is not understood
-        if split_input[0] not in actions:
-            cls.responce = "I don't understand"
-            return
-
-        # calls the corresponding function for the first word of the input text
-        if str(signature(actions[split_input[0]])) != "()":
-            actions[split_input[0]](split_input)
-
-        else:
-            actions[split_input[0]]()
-
+# creating verbs
+go = verb("go", [north, south, east, west], Main.go_direction)
+get = verb("get", [], Main.get_item)
+use = verb("use", [], Main.use_item)
+# TODO: give items descriptions and create a function to show them
+examine = verb("examine", [])
+talk = verb("talk", [], Main.talk_npc)
 
 if __name__ == "__main__":
 

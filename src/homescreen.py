@@ -60,7 +60,7 @@ class Homescreen:
             DISPLAY.blit(text_surface, (10, WINHIEGHT - 32))
 
             DISPLAY.blit(cls.title, cls.title_rect)
-            DISPLAY.blit(cls.made_by, cls.made_by_rect)
+            # DISPLAY.blit(cls.made_by, cls.made_by_rect)
             DISPLAY.blit(cls.prompt, cls.prompt_rect)
 
             pygame.display.flip()
