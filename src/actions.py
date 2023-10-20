@@ -19,16 +19,28 @@ class word(pygame.sprite.Sprite):
     def reset(self):
         self.clicked = False
 
-class verb(word):
+class Verb(word):
       def __init__(self, name, nouns, action=None):
           super().__init__(name)
 
           self.nouns = nouns
           self.action = action
 
-class noun(word):
-    def __init__(self, name):
+class Noun(word):
+    def __init__(self, name, verbs=[None]):
+        super().__init__(name)
+        self.verbs = verbs
+
+    def disable_collider(self):
+        self.colliable = False
+
+
+class Misc_Button(word):
+    def __init__(self, name, action=None):
         super().__init__(name)
 
-    def destroy_collider(self):
-        self.rect = None
+        self.action = action
+
+    def execute_action(self):
+        self.action()
+

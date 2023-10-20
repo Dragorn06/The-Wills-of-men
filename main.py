@@ -1,16 +1,19 @@
 """
-The Wills of Men
+The Wills of Men v0.4.1
 a text adventure game
+by Dagorn06
 """
 
 import gc
 import sys
+import json
+import os
 # general imports
 import textwrap
 
 import pygame
 
-from src.actions import noun, verb
+from src.actions import Noun, Verb, Misc_Button
 from src.constants import (BASE_FONT, CLOCK, DISPLAY, FANCY_FONT, WINHIEGHT,
                            WINWIDTH)
 from src.homescreen import Homescreen
@@ -29,138 +32,181 @@ pygame.init()
 
 
 def render_title():
-    """Renders the title at the top of the page"""
+    """Render the title at the top of the page."""
+    title_text = Main.current_room.name
 
-    title = FANCY_FONT.render(Main.current_room.name, True, (255, 255, 255))
+    # Render the title text.
+    title_surface = FANCY_FONT.render(title_text, True, (255, 255, 255))
+    title_rect = title_surface.get_rect(center=(WINWIDTH // 2, 20))
 
-    title_rect = title.get_rect(center=(WINWIDTH // 2, 20))
-
-    DISPLAY.blit(title, title_rect)
-
+    # Display the title text.
+    DISPLAY.blit(title_surface, title_rect)
 
 def render_description():
-    """Renders the current room's description"""
+    """Render the current room's description."""
 
+    # Set the initial description position.
     description_y = 50
 
-    for line in textwrap.wrap(Main.current_room.description, 30):
+    # Wrap the room's description text.
+    description_lines = textwrap.wrap(Main.current_room.description, 30)
 
-        description_surface_line = BASE_FONT.render(line, False,
-                                                    (255, 255, 255))
-
+    # Render each line of the description text.
+    for line in description_lines:
+        description_surface_line = BASE_FONT.render(line, False, (255, 255, 255))
         DISPLAY.blit(description_surface_line, (12, description_y))
-
         description_y += 15
 
-
 def render_inventory():
-    """Renders the contents of the players inventory in a list"""
+    """Render the contents of the player's inventory in a list."""
 
+    # Set the initial inventory position.
     inventory_y = 50
 
+    # Render each item in the player's inventory.
     for item in Inventory.contents:
-
-        item_surface_i = BASE_FONT.render(item.name, False, (255, 255, 255))
-
-        DISPLAY.blit(item_surface_i,
-                     (WINWIDTH - (WINWIDTH / 3) + 2, inventory_y))
-
+        item_surface = BASE_FONT.render(item.name, False, (255, 255, 255))
+        DISPLAY.blit(item_surface, (WINWIDTH - (WINWIDTH / 3) + 2, inventory_y))
         inventory_y += 15
 
+def render_verbs(mouse: pygame.Vector2, verb_list: list[Verb]):
+    """Render the verbs the player can use.
 
-def render_verbs(mouse):
-    """Renders the verbs the player can use"""
+    Args:
+        mouse: The mouse position.
+        verb_list: The list of verbs to render.
+    """
 
-    verb_list = [v for v in gc.get_objects() if isinstance(v, verb)]
+    # Count the number of clicked verbs.
+    num_clicked = len([v for v in verb_list if v.clicked])
 
-    verb_list = [verb_list[x:x+3] for x in range(0, len(verb_list), 3)]
+    # Group the verbs into rows of 3.
+    verb_rows = [verb_list[x:x+3] for x in range(0, len(verb_list), 3)]
 
+    # Set the initial verb position.
     verb_x = WINWIDTH // 3
     verb_y = WINHIEGHT - WINHIEGHT // 3
 
-    for sublist in verb_list:
+    # Render each verb row.
+    for verb_row in verb_rows:
+        for verb in verb_row:
+            # Render the verb text.
+            verb_surface = FANCY_FONT.render(f" {verb.name} ", True, (255, 255, 255))
 
-        for v in sublist:
+            # Set the verb's rectangle.
+            verb.rect = verb_surface.get_rect(center=(verb_x, verb_y))
 
-            verb_surface = FANCY_FONT.render(
-                f" {v.name} ", True, (255, 255, 255))
-            v.rect = verb_surface.get_rect(center=(verb_x, verb_y))
+            # Draw a border around the verb if it is clicked or hovered over.
+            if verb.rect.collidepoint(mouse) or verb.clicked:
+                pygame.draw.rect(DISPLAY, (255, 255, 255), verb.rect, 2, border_radius=5)
 
-            if v.rect.collidepoint(mouse) or v.clicked:
-                pygame.draw.rect(DISPLAY, (255, 255, 255),
-                                 v.rect, 2, border_radius=5)
+                # Render the verb's noun list if there is only one clicked verb and it is clicked
+                if not verb.clicked and num_clicked == 1:
+                    pass
+                else:
+                    render_nouns(verb, mouse)
 
-                render_nouns(v, mouse)
+            # Display the verb text.
+            DISPLAY.blit(verb_surface, verb.rect)
 
-            DISPLAY.blit(verb_surface, v.rect)
-
+            # Move the verb position down.
             verb_y += 50
 
+        # Reset the verb position to the next row.
         verb_y = WINHIEGHT - WINHIEGHT // 3
         verb_x += 120
 
+def render_nouns(verb: Verb, mouse: pygame.Vector2):
+    """Render the nouns for the given verb.
 
-def render_nouns(parent_verb, mouse):
+    Args:
+        verb: The verb to render the nouns for.
+        mouse: The mouse position.
+    """
 
+    # Set the initial noun position.
     noun_x = WINWIDTH - WINWIDTH // 3
     noun_y = WINHIEGHT - WINHIEGHT // 3
 
-    for noun in parent_verb.nouns:
+    # Render each noun.
+    for noun in verb.nouns:
+        # Render the noun text.
+        noun_surface = FANCY_FONT.render(f" {noun.name} ", True, (255, 255, 255))
 
-        noun_surface = FANCY_FONT.render(
-            f" {noun.name} ", True, (255, 255, 255))
+        # Set the noun's rectangle.
         noun.rect = noun_surface.get_rect(center=(noun_x, noun_y))
-        
-        if noun.rect.collidepoint(mouse) or noun.clicked:
-            pygame.draw.rect(DISPLAY, (255, 255, 255),
-                             noun.rect, 2, border_radius=5)
 
+        # Draw a border around the noun if it is clicked or hovered over.
+        if noun.rect.collidepoint(mouse) or noun.clicked:
+            pygame.draw.rect(DISPLAY, (255, 255, 255), noun.rect, 2, border_radius=5)
+
+        # Display the noun text.
         DISPLAY.blit(noun_surface, noun.rect)
 
+        # Move the noun position down.
         noun_y += 50
 
-def render_event():
-    """Renders any events that occur. These can be triggered by item uses"""
+def render_misc_buttons(mouse: pygame.Vector2, button_list: list[Misc_Button]):
+    """Render the misc buttons.
 
+    Args:
+        mouse: The mouse position.
+        button_list: The list of misc buttons to render.
+    """
+
+    # Set the initial misc button position.
+    misc_button_y_offset = 0
+
+    # Render each misc button.
+    for button in button_list:
+        # Render the misc button text.
+        button_surface = FANCY_FONT.render(f"{button.name}", True, (255, 255, 255))
+
+        # Set the misc button's rectangle.
+        button.rect = button_surface.get_rect(center=(WINWIDTH - (WINWIDTH // 10), 20 + misc_button_y_offset))
+        
+        # draw a border if the mouse hovers over the button
+        if button.rect.collidepoint(mouse):
+            pygame.draw.rect(DISPLAY, (255, 255, 255), button.rect, 2, border_radius=5)
+
+        # blit the button
+        DISPLAY.blit(button_surface, button.rect)
+
+        # move the next button down
+        misc_button_y_offset += 50
+
+
+def render_event():
+    """Render any events that occur. These can be triggered by item uses."""
+
+    # Set the initial event position.
     event_y_offset = 0
 
-    for line in textwrap.wrap(Main.event, 40):
+    # Wrap the event text.
+    event_lines = textwrap.wrap(Main.event, 40)
 
+    # Render each line of the event text.
+    for line in event_lines:
         event_surface = BASE_FONT.render(line, False, (255, 255, 255))
-
         event_rect = event_surface.get_rect(
             center=(WINWIDTH // 2,
-                    WINHIEGHT - (WINHIEGHT // 3) + event_y_offset))
-
+                    WINHIEGHT - (WINHIEGHT // 2.4) + event_y_offset))
         DISPLAY.blit(event_surface, event_rect)
-
         event_y_offset += 15
 
+def render_response_text():
+    """Render the one-line response that the player is given."""
 
-def render_responcetext():
-    """Renders the one line responce that the player is given"""
+    # Get the response text.
+    response_text = Main.responce
 
-    responce_surface = BASE_FONT.render(Main.responce, False, (255, 255, 255))
+    # Render the response text.
+    response_surface = BASE_FONT.render(response_text, False, (255, 255, 255))
 
-    DISPLAY.blit(responce_surface, (WINWIDTH // 48, WINHIEGHT - 57))
+    # Display the response text.
+    DISPLAY.blit(response_surface, (WINWIDTH // 48, WINHIEGHT - 57))
 
-
-# creating items
-Torch = Item('Torch', 0, ' On the wall there is a lit Torch.')
-CoalBarrel = Item('Barrel of coal', 1,
-                  ' In the corner there is a barrel of coal.')
-Key = Item('Rusty key', 2, '')
-CoinBag = Item(
-    'Bag of Coins', 3,
-    'In the gutter you see a bag of coins glinting in the sunlight.')
-MagicScroll = Item('Magic Scroll', 4,
-                   'Behind a pebble you can see a scroll sticking out')
-Sword = Item("Sword", 5, "")
-
-# Hidding items
-Key.hidden = True
-
-# Iem usages
+# Item usages
 '''
 first word - level item is used in e.g. l1 is used in level 1
 second word - what it does
@@ -169,40 +215,55 @@ second word - what it does
 
 def l1_light_forge():
     """Lights the forge in the Abandoned forge"""
-    if Main.current_room == Abandoned_forge:
-        if Torch in Inventory.contents and CoalBarrel in Inventory.contents:
+    if Main.current_room.room_id == 2:
+        if Booter.items[0] in Inventory.contents and Booter.items[1] in Inventory.contents:
 
             Main.responce = "you light the forge with the torch and coal."
 
             Main.event = "Suddenly a key appears on the anvil"
 
-            Key.description = 'There is a Rusty key on the anvil'
-            Key.hidden = False
+            Booter.items[2].description = 'There is a Rusty key on the anvil'
+            Booter.items[2].hidden = False
 
-            Main.current_room.add_item(Key)
+            Main.current_room.add_item(Booter.items[2])
 
-            Inventory.remove_item(CoalBarrel)
+            Inventory.remove_item(Booter.items[1])
+
+            Main.assign_get_nouns()
+            Main.assign_examine_use_nouns()
 
 
+def explore_room():
+    """
+    displays the explore text of a room and removes any hidden exits
+    """
+    if Main.current_room.explore_text != ' you find nothing of note':
+        Main.event = Main.current_room.explore_text
+
+        Main.current_room.hidden_exits = []
+
+        save(Main.current_room.room_id)
+
+    
 def l1_open_door():
     """opens the door in the dark room"""
-    if Main.current_room == Dark_Room:
-        if "north" not in Dark_Room.hidden_exits:
+    if Main.current_room.room_id == 0:
+        if "north" not in Main.current_room.hidden_exits:
 
             Main.responce = "you open the door"
             Main.current_room.locked_exits.remove("north")
-            Inventory.remove_item(Key)
+            Inventory.remove_item(Booter.items[2])
 
 
 def l2_buy_sword():
     """buys the sword in the market"""
-    if Main.current_room == Atvust_Market:
-        if CoinBag in Inventory.contents:
+    if Main.current_room == Booter.rooms[7]:
+        if Booter.items[3] in Inventory.contents:
 
             Main.responce = "you buy the sword"
             Main.event = "'Here the sword is yours!'"
-            Inventory.add_item(Sword)
-            Inventory.remove_item(CoinBag)
+            Inventory.add_item(Booter.items[5])
+            Inventory.remove_item(Booter.items[3])
 
             Main.current_room.description = Main.current_room.description.replace(
                 "There is a sword for sale at one of the stalls", '')
@@ -210,162 +271,161 @@ def l2_buy_sword():
 
 def l2_fight_bear():
     """Fight the bear using the sword and the scroll"""
-    if Main.current_room == Forest_entrance:
-        if Sword in Inventory.contents and MagicScroll not in Inventory.contents:
+    if Main.current_room == Booter.rooms[6]:
+        if Booter.items[5] in Inventory.contents and Booter.items[4] not in Inventory.contents:
             Main.event = """You use your sword to take on the bear.
             You fight valiantly but are forced to retreat"""
-        elif Sword in Inventory.contents and MagicScroll in Inventory.contents:
-            Main.event = """You use your sword to take on the bear.
-            The bear flails at you as if possed knocking your sword out of your hand!
-              In an instant you pull the magic scroll out of your satchel,
-                you read the words incribed on it and in a great blaze of fire
-                  the bear is annihilated."""
+        elif Booter.items[5] in Inventory.contents and Booter.items[4] in Inventory.contents:
+            Main.event = """You use your sword and the magic scroll to scare the bear away!"""
 
             Main.current_room.description = Main.current_room.description.replace(
                 "Suddenly a bear jumps out infront of you blocking the way.",
                 "")
 
-            Main.current_room.description = "You have finished The Wills of Men v0.3.0"
-            MagicScroll.usage = None
-            Sword.usage = None
+            Main.current_room.description = "You have finished The Wills of Men v0.4.1"
+            Booter.items[4].usage = None
+            Booter.items[5].usage = None
+
+class Booter:
+    rooms = []
+    items = []
+    usages = {
+        "0": [l1_light_forge, explore_room],
+        "1": [l1_light_forge],
+        "2": [l1_open_door],
+        "3": [l2_buy_sword],
+        "4": [l2_fight_bear],
+        "5": [l2_fight_bear]
+    }
+    npcs = []
+
+    @classmethod
+    def boot(cls):
+
+        cls.create_items("src/GameObjects/items.json", cls.usages)
+        cls.create_npcs("src/GameObjects/npcs.json", cls.items)
+        cls.create_rooms("src/GameObjects/rooms.json", cls.items, cls.npcs)
+
+        # print([i.data() for i in cls.rooms])
+        Main.current_room = cls.rooms[0]
+        render_title()
+
+        Homescreen.loop()
+        if Homescreen.donext == 'load':
+            Main.current_room = load()
+        else:
+            pass
+        Main.game_loop()
 
 
-# assigning usages to items
-Torch.usage = l1_light_forge
-CoalBarrel.usage = l1_light_forge
-Key.usage = l1_open_door
-CoinBag.usage = l2_buy_sword
-MagicScroll.usage = l2_fight_bear
-Sword.usage = l2_fight_bear
+    @classmethod
+    def create_items(cls, json_file, usages):
+        """Creates instances of the Item class from a JSON file.
 
-# creating npcs
-Wizard = Npc(
-    "Wizard", 0, MagicScroll, "Hello strong of Will",
-    "I see you have found a magic scroll. Use it, but be careful. They can be firey at times!"
-)
-Landlord = Npc("Landlord", 1, Sword, "Welcome traveller! What'll it be?",
-               "If its a fight your looking for then head to the woods.")
+        Args:
+            json_file: The path to the JSON file.
+        """
 
-# creating rooms
-# Level 1
+        with open(json_file, "r") as f:
+            json_data = json.load(f)
 
-Dark_Room = Room(
-    'Dark Room', 0, """You're in a dark cave. It is pitch black but you
- begin to feel your way around the room """,
-    ' To the north of the room you find a key hole.')
+        for item_data in json_data:
+            item = Item(
+            json_data[f"{item_data}"]["Name"],
+            json_data[f"{item_data}"]["ID"],
+            json_data[f"{item_data}"]["description"],
+            json_data[f"{item_data}"]["Examine Text"]
+            )
 
-Lake = Room(
-    'Lake of Dreams',
-    1,
-    """You walk into a dimly lit cavern.
- In the center is a glowing blue lake.
- On the wall there is a lit Torch.""",
-)
+            if json_data[f"{item_data}"]["Is Hidden"]:
+                item.hidden = True
+            else:
+                item.hidden = False
 
-Abandoned_forge = Room(
-    'Abandoned Forge', 2, """You walk into a new room.
- It appears to be an old forge with old will forging equipment and an anvil.
-There is a thin been of light coming into the room
- from a man made hole in the ceiling.
- In the corner there is a barrel of coal.""")
+            try:
+                item.usage = usages[f"{item.item_id}"]
+            except KeyError:
+                print("item has no defined usages")
+            
+            cls.items.append(item)
 
-# Level 2
-Crossroads = Room(
-    'Crossroads',
-    3,
-    """you find yourself at a crossroads in the mountains.
- There are three paths infront of you.
- One leads west down into a dark sprawlling forest. Another track to the east winds
- up high into the mountains.
- The last path leads down to a small hamlet far bellow you.""",
-)
 
-Atvust = Room(
-    'Atvust', 4, """you enter the village of Avust.
- As you walk down the narrow but clean streets the sounds of merriment begin to surround you.
- Soon you come to the main square to the west there is a tavern and to the east there is a market. 
- In the gutter you see a bag of coins glinting in the sunlight.""")
+    @classmethod
+    def create_npcs(cls, json_file, items):
+        """Creates instances of the Room class from a JSON file.
 
-Mountaintop = Room(
-    'Mountaintop', 5,
-    """As you crest the peak of the icy mountain the land stretches out far below you. 
-Below you, a village can be seen in the distance as well as a dark sprawling forrest. 
-There is a magical presence here. Behind a pebble you can see a scroll sticking out"""
-)
+        Args:
+            json_file: The path to the JSON file.
+            items: a list of all of the item objects
+        """
 
-Forest_entrance = Room(
-    'Forest Entrance', 6,
-    """You are unerved by the forrest as if the is an evil presense here.
-      Suddenly a bear jumps out infront of you blocking the way.""")
+        with open(json_file, "r") as f:
+            json_data = json.load(f)
 
-Atvust_Market = Room(
-    'Market', 7,
-    """The small market you are now presented with is surprisingly lively. 
-All around you villagers are haggling with merchants from the outer dales. 
-Sitting quietly at one of the stands at the far end of the market is a wizard.
- There is a sword for sale at one of the stalls""")
+        for npc_data in json_data:
+            npc = Npc(
+                json_data[f"{npc_data}"]["Name"],
+                json_data[f"{npc_data}"]["NpcId"],
+                json_data[f"{npc_data}"]["Primary Dialogue"],
+                json_data[f"{npc_data}"]["Secondary Dialogue"]
+            )
 
-Atvust_Tavern = Room(
-    'Tavern', 8,
-    """The smell of hearty ale wafts towards you as you enter the Tavern.
- Once you are inside you see many people of the town including 
- several Arcinthian Dwarves drinking and sining merrily.
- Behind the bar you see the Landlord cleaning an tankard.
- """)
+            condition_item = json_data[f"{npc_data}"]["Condition Item"]
+            for item in cls.items:
+                if condition_item == item.item_id:
+                    npc.condition_item = item
 
-# Setting up room exits
-# each room can have four exits
-Dark_Room.exits = {"north": Crossroads, "east": Abandoned_forge, "west": Lake}
-Lake.exits = {"east": Dark_Room}
-Abandoned_forge.exits = {"west": Dark_Room}
-Crossroads.exits = {
-    "north": Atvust,
-    "south": Dark_Room,
-    "east": Mountaintop,
-    "west": Forest_entrance
-}
-Mountaintop.exits = {"west": Crossroads}
-Forest_entrance.exits = {"east": Crossroads}
-Atvust.exits = {
-    "south": Crossroads,
-    "east": Atvust_Market,
-    "west": Atvust_Tavern
-}
-Atvust_Market.exits = {"west": Atvust}
-Atvust_Tavern.exits = {"east": Atvust}
+            cls.npcs.append(npc)
 
-# setting up locked exits
-Dark_Room.locked_exits = ["north"]
+    @classmethod
+    def create_rooms(cls, json_file, items, npcs):
+        """Creates instances of the Room class from a JSON file.
 
-# setting up hidden exits
-Dark_Room.hidden_exits = ["north"]
+        Args:
+            json_file: The path to the JSON file.
+            items: a list of all of the item objects.
+            npcs: a list of all of the npc objects.
+        """
 
-# setting up the contents of rooms
-Dark_Room.contents = []
-Lake.contents = [Torch]
-Abandoned_forge.contents = [CoalBarrel, Key]
-Mountaintop.contents = [MagicScroll]
-Forest_entrance.contents = []
-Atvust.contents = [CoinBag]
-Atvust_Market.contents = []
-Atvust_Tavern.contents = []
+        with open(json_file, "r") as f:
+            json_data = json.load(f)
 
-# assigning npcs to rooms
-Dark_Room.npcs = []
-Lake.npcs = []
-Abandoned_forge.npcs = []
-Mountaintop.npcs = []
-Forest_entrance.npcs = []
-Atvust.npcs = []
-Atvust_Market.npcs = [Wizard]
-Atvust_Tavern.npcs = [Landlord]
+        for room_data in json_data:
+            room = Room(
+            json_data[f"{room_data}"]["Name"],
+            json_data[f"{room_data}"]["RoomId"],
+            json_data[f"{room_data}"]["Description"],
+            json_data[f"{room_data}"]["ExploreText"],
+            )
+
+            # Add any items in the room.
+            for item_id in json_data[f"{room_data}"]["Contents"]:
+                for item in cls.items:
+                    if item_id == item.item_id:
+                        room.contents.append(item)
+            
+            for npc_id in json_data[f"{room_data}"]["Npcs"]:
+                for npc in cls.npcs:
+                    if npc_id == npc.npc_id:
+                        room.npcs.append(npc)
+
+            #set the rooms exits
+            room.exits = json_data[f"{room_data}"]["Exits"]
+
+            # Add any hidden exits.
+            room.hidden_exits = json_data[f"{room_data}"]["HiddenExits"]
+
+            # Add any locked exits.
+            room.locked_exits = json_data[f"{room_data}"]["LockedExits"]
+
+            cls.rooms.append(room)
 
 
 class Main:
     """The main class containing player location data and the main game loop as well"""
 
     # the room the player is in
-    current_room = Dark_Room
+    current_room = None
 
     # responce to player action
     responce = ''
@@ -377,6 +437,10 @@ class Main:
 
     pygame.display.set_caption('The Wills of Men')
 
+    verbs = None
+    nouns = None
+    misc_buttons = None
+
     # main game loop
     @classmethod
     def game_loop(cls):
@@ -386,7 +450,7 @@ class Main:
 
         cls.assign_get_nouns()
 
-        cls.assign_examine_nouns()
+        cls.assign_examine_use_nouns()
 
         cls.assign_talk_nouns()
 
@@ -399,8 +463,9 @@ class Main:
 
             mouse = pygame.mouse.get_pos()
 
-            verbs = [s for s in gc.get_objects() if isinstance(s, verb)]
-            nouns = [s for s in gc.get_objects() if isinstance(s, noun)]
+            cls.verbs = [s for s in gc.get_objects() if isinstance(s, Verb)]
+            cls.nouns = [s for s in gc.get_objects() if isinstance(s, Noun)]
+            cls.misc_buttons = [b for b in gc.get_objects() if isinstance(b, Misc_Button)]
 
             for event in pygame.event.get():
 
@@ -410,196 +475,293 @@ class Main:
                     sys.exit()
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    try:
-                        verb_collisions = [
-                            v for v in verbs if v.rect.collidepoint(mouse)]
-                        clicked_verb = verb_collisions[0]
-                    except:
-                        clicked_verb = None
-
-                    try:
-                        noun_collisions = [
-                            n for n in nouns if n.rect.collidepoint(mouse) and n in cls.live_verb.nouns]
-                        clicked_noun = noun_collisions[0]
-                    except:
-                        clicked_noun = None
-
-                    cls.update_verbs(verbs, nouns, clicked_verb, clicked_noun)
 
                     clicked_verb = None
                     clicked_noun = None
+                    clicked_misc_button = None
+
+                    # Get the list of collisions for all three types of objects.
+                    verb_collisions = [v for v in cls.verbs if v.rect.collidepoint(mouse)]
+                    if cls.live_verb is not None:
+                        noun_collisions = [n for n in cls.live_verb.nouns if n.rect.collidepoint(mouse) ]
+                    else:
+                        noun_collisions = []
+                    misc_button_collisions = [b for b in cls.misc_buttons if b.rect.collidepoint(mouse)]
+                    # If there are any collisions, set the corresponding variable to the collided object.
+
+                    if verb_collisions:
+                        clicked_verb = verb_collisions[0]
+                    if noun_collisions:
+                        clicked_noun = noun_collisions[0]
+                    if misc_button_collisions:
+                        clicked_misc_button = misc_button_collisions[0]
+
+                    # Update the verbs, nouns, and misc buttons based on the clicked objects.
+                    cls.update_verbs(clicked_verb)
+                    cls.update_nouns(cls.live_verb, clicked_noun)
+                    cls.update_misc_button(clicked_misc_button)
 
             # all the information the player needs to see is rendered here
             render_title()
             render_description()
             render_inventory()
 
-            render_verbs(mouse)
+            render_verbs(mouse, cls.verbs)
+            render_misc_buttons(mouse, cls.misc_buttons)
 
             render_event()
-            render_responcetext()
+            render_response_text()
 
+            # Update the display.
             pygame.display.flip()
-            CLOCK.tick(60)
+
+            # Limit the framerate to 60 FPS.
+            CLOCK.tick(120)
 
     @classmethod
     def assign_get_nouns(cls):
-        get_noun_list = []
-        for i in cls.current_room.contents:
-            if not i.hidden:
-                item_noun_i = noun(f"{i.name}")
-                get_noun_list.append(item_noun_i)
+        """Assign nouns to the `get` verb."""
 
-        get.nouns = get_noun_list
+        get_nouns = []
+        for item in cls.current_room.contents:
+            if not item.hidden:
+                get_noun = Noun(f"{item.name}", [get])
+                get_nouns.append(get_noun)
+
+        get.nouns = get_nouns
+
 
     @classmethod
-    def assign_examine_nouns(cls):
-        use_examine_list = []
-        for i in Inventory.contents:
-            use_examine_noun_i = noun(f"{i.name}")
-            use_examine_list.append(use_examine_noun_i)
+    def assign_examine_use_nouns(cls):
+        """Assign nouns to the `examine` and `use` verbs."""
 
-        use.nouns = use_examine_list
-        examine.nouns = use_examine_list
+        examine_use_nouns = []
+        for item in Inventory.contents:
+            examine_use_noun = Noun(f"{item.name}")
+            examine_use_nouns.append(examine_use_noun)
+
+        use.nouns = examine_use_nouns
+        examine.nouns = examine_use_nouns
+
+        # Assign the `use` and `examine` verbs to each noun.
+        for noun in examine_use_nouns:
+            noun.verbs = [use, examine]
 
     @classmethod
     def assign_talk_nouns(cls):
-        talk_list = []
-        for n in cls.current_room.npcs:
-            npc_noun_n = noun(f"{n.name}")
-            talk_list.append(npc_noun_n)
+        """Assign nouns to the `talk` verb."""
 
-        talk.nouns = talk_list
+        talk_nouns = []
+        for npc in cls.current_room.npcs:
+            talk_noun = Noun(f"{npc.name}", [talk])
+            talk_nouns.append(talk_noun)
+
+        talk.nouns = talk_nouns
+
 
     @classmethod
-    def update_nouns(cls, nouns, verbs, clicked_noun, clicked_verb):
+    def update_nouns(cls, clicked_verb: Verb, clicked_noun: Noun):
+        """Update the nouns associated with the clicked verb.
+
+        Args:
+            clicked_verb: The verb that was clicked.
+            clicked_noun: The noun that was clicked.
+        """
+
         if clicked_noun:
-            clicked_noun.update()
+            # Find the verb on the noun and update it.
+            for verb in clicked_noun.verbs:
+                if verb.name == clicked_verb.name:
+                    verb.action(clicked_noun.name)
 
-            return clicked_noun.name
+            # Reset all other verbs and nouns.
+            cls.live_verb = None
+            for noun in cls.nouns + cls.verbs:
+                noun.reset()
 
     @classmethod
-    def update_verbs(cls, verbs, nouns, clicked_verb, clicked_noun):
+    def update_verbs(cls, clicked_verb: Verb):
+        """Update the verbs associated with the clicked verb.
+
+        Args:
+            clicked_verb: The verb that was clicked.
+        """
+
         if clicked_verb:
-            print(clicked_verb.name)
+            # Update the clicked verb.
             clicked_verb.update()
 
-            cls.live_verb = clicked_verb
-
-            for v in [v for v in verbs if v is not clicked_verb]:
-
-                v.clicked = False
-        try:
-            print(f"clicked nouns: {clicked_noun.name}")
-        except:
-            print("no nouns clicked")
-        print(f"nouns: {[n.name for n in nouns]}")
-
-        arg = cls.update_nouns(nouns, verbs, clicked_noun, clicked_verb)
-
-        if arg:
-            for v in [v for v in verbs if v.clicked]:
-
-                v.action(arg)
-
-            for w in nouns + verbs:
-                w.reset()
-
-    @classmethod
-    def go_direction(cls, direction):
-        if direction in cls.current_room.exits:
-            if direction not in cls.current_room.hidden_exits+cls.current_room.locked_exits:
-                cls.responce = f'you go {direction}'
-
-                # sets the players current room to the new room
-                cls.current_room = cls.current_room.exits[direction]
-                save(cls.current_room.room_id)
-
-                cls.assign_get_nouns()
-
-                cls.assign_examine_nouns()
-
-                cls.assign_talk_nouns()
-
+            # Set the live verb if the clicked verb is clicked.
+            if clicked_verb.clicked:
+                cls.live_verb = clicked_verb
             else:
-                cls.responce = f"you can't go that way"
-        else:
-            cls.responce = f"you can't go that way"
+                cls.live_verb = None
+
+            # Unclick all other verbs.
+            for verb in [verb for verb in cls.verbs if verb is not clicked_verb]:
+                verb.clicked = False
+
 
     @classmethod
-    def get_item(cls, item):
-        # checks items in a room against the players input
-        for i in cls.current_room.contents:
-            if item == i.name:
-                print("True")
-                if not i.hidden:
+    def update_misc_button(cls, clicked_misc_button: Misc_Button):
+        """Update the clicked misc button.
 
+        Args:
+            clicked_misc_button: The misc button that was clicked.
+        """
+
+        if clicked_misc_button:
+            # Call the action of the clicked misc button.
+            clicked_misc_button.action()
+
+    @classmethod
+    def go_direction(cls, direction: str):
+        """Try to go in the given direction.
+
+        Args:
+            direction: The direction to go in.
+        """
+        try:
+            target_id = cls.current_room.exits[direction]
+        except KeyError:
+            cls.responce = "You can't go that way."
+            return 0
+       
+        # Check if the exit is hidden or locked.
+        if direction not in cls.current_room.hidden_exits + cls.current_room.locked_exits:
+            # Set the player's current room to the new room.
+            for room in Booter.rooms:
+                    if target_id == room.room_id:
+                        
+                        cls.current_room = room
+
+                    else:
+                        cls.responce = "You can't go that way."
+
+
+            # Save the player's current room.
+            save(cls.current_room.room_id)
+            # Assign nouns to the `get`, `examine`, `use`, and `talk` verbs.
+            cls.assign_get_nouns()
+            cls.assign_examine_use_nouns()
+            cls.assign_talk_nouns()
+
+            cls.responce = f"You go {direction}"
+            # Clear the event.
+            cls.event = ""
+        else:
+            cls.responce = "You can't go that way."
+ 
+
+    @classmethod
+    def get_item(cls, item: str):
+        """Pick up the given item from the current room.
+
+        Args:
+            item: The item to pick up.
+        """
+        # checks items in a room against the players input a
+        for i in cls.current_room.contents:
+            if item == i.name and not i.hidden:
+                    
+                    # adds the item to the players inventory and removes it from the room
                     Inventory.add_item(i)
-                    cls.responce = f'you get the {item}'
                     cls.current_room.remove_item(i)
+
+                    cls.responce = f'you get the {item}'
+
+                    # assigns 'get', 'use' and 'examine nouns
                     cls.assign_get_nouns()
-                    cls.assign_get_nouns()
+                    cls.assign_examine_use_nouns()
+                    
+                    # saves the game
                     save(cls.current_room.room_id)
 
 
     @classmethod
-    def talk_npc(cls, npc):
+    def talk_to_npc(cls, npc_name: str):
+        """Talk to the NPC with the given name.
+
+        Args:
+            npc_name: The name of the NPC to talk to.
+
+        Returns:
+            The NPC's response.
+        """
+
         for npc in cls.current_room.npcs:
-            if npc == npc.name:
+            if npc.name == npc_name:
                 cls.event = npc.say_something()
 
-#
-        if Torch in Inventory.contents:
+    @classmethod
+    def use_item(cls, item_name: str):
+        """Use the item with the given name.
 
-            if cls.current_room.explore_text != ' you find nothing of note':
-                cls.event = cls.current_room.explore_text
+        Args:
+            item_name: The name of the item to use.
+        """
 
-            cls.responce = "you explore the room"
-
-            cls.current_room.hidden_exits = []
-
-            save(cls.current_room.room_id)
+        for item in Inventory.contents:
+            if item_name in item.name:
+                if item.usage is not None:
+                    for usage in item.usage:
+                        usage()
 
     @classmethod
-    def use_item(cls, item):
-        for i in Inventory.contents:
+    def examine_item(cls, item_name: str):
+        """Examine the item with the given name.
 
-            if item in i.name:
-                if i.usage is not None:
-                    i.usage()
+        Args:
+            item_name: The name of the item to examine.
+        """
+
+        for item in Inventory.contents:
+            if item_name in item.name:
+                cls.responce = item.examine_text
 
     @classmethod
     def save(cls):
+        """Save the player's progress."""
+
         save(cls.current_room.room_id)
-        cls.responce = 'you save'
+        cls.responce = "You save."
+
+    @classmethod
+    def load(cls):
+        """Load the player's progress."""
+
+        save_data.load()
 
     @classmethod
     def quit(cls):
+        """Quit the game."""
+
         pygame.quit()
         sys.exit()
 
 
 # creating nouns
-north = noun("north")
-south = noun("south")
-east = noun("east")
-west = noun("west")
+north = Noun("north")
+south = Noun("south")
+east = Noun("east")
+west = Noun("west")
 
 # creating verbs
-go = verb("go", [north, south, east, west], Main.go_direction)
-get = verb("get", [], Main.get_item)
-use = verb("use", [], Main.use_item)
-# TODO: give items descriptions and create a function to show them
-examine = verb("examine", [])
-talk = verb("talk", [], Main.talk_npc)
+go = Verb("go", [north, south, east, west], Main.go_direction)
+get = Verb("get", [], Main.get_item)
+use = Verb("use", [], Main.use_item)
+examine = Verb("examine", [], Main.examine_item)
+talk = Verb("talk", [], Main.talk_to_npc)
+
+north.verbs = [go]
+south.verbs = [go]
+east.verbs = [go]
+west.verbs = [go]
+
+# creating misc buttons
+save_button = Misc_Button("save", Main.save)
+load_button = Misc_Button("load", Main.load)
+quit_button = Misc_Button("quit", Main.quit)
 
 if __name__ == "__main__":
-
-    render_title()
-
-    Homescreen.loop()
-    if Homescreen.donext == 'load':
-        Main.current_room = load()
-    else:
-        pass
-    Main.game_loop()
+    Booter.boot()
