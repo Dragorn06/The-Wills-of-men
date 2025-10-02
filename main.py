@@ -13,17 +13,17 @@ import textwrap
 
 import pygame
 
-from src.actions import Noun, Verb, Misc_Button
-from src.constants import (BASE_FONT, CLOCK, DISPLAY, FANCY_FONT, WINHIEGHT,
+from src.scripts.actions import Noun, Verb, Misc_Button
+from src.scripts.constants import (BASE_FONT, CLOCK, DISPLAY, FANCY_FONT, WINHIEGHT,
                            WINWIDTH)
-from src.homescreen import Homescreen
+from src.scripts.homescreen import Homescreen
 
 # importing other parts of the game
-from src.inventory import Inventory
-from src.items import Item
-from src.npcs import Npc
-from src.rooms import Room
-from src.save_data import load, save
+from src.scripts.inventory import Inventory
+from src.scripts.items import Item
+from src.scripts.npcs import Npc
+from src.scripts.rooms import Room
+from src.scripts.save_data import load, save
 
 # initialising pygame
 pygame.init()

@@ -4,20 +4,19 @@ This file acts almost as its own program functioning as a homescreen for the gam
 
 import sys
 import pygame
-from .constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY, BASE_FONT, FANCY_FONT
+from .constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY, BASE_FONT, FANCY_FONT, TITLE_FONT, FLAVOUR_TEXT_FONT
 
 
 class Homescreen:
     """The homescreen class which renders the homescreen and takes some limmited input"""
 
-    SMALL_FONT_1 = pygame.font.Font('src/fonts/antiquity-print.ttf', 16)
-    SMALL_FONT_2 = pygame.font.Font('src/fonts/BitPotionExt.ttf', 24)
+
 
     donext = None
     input_text = ''.lower()
 
-    made_by = SMALL_FONT_1.render("made by Dragorn06", False, (255, 255, 255))
-    prompt = SMALL_FONT_2.render(
+    made_by = TITLE_FONT.render("made by Dragorn06", False, (255, 255, 255))
+    prompt = FLAVOUR_TEXT_FONT.render(
         'Type "start" to begin and "load" to load a save. To quit type "quit".',
         True, (255, 255, 255))
     title = FANCY_FONT.render("THE WILLS OF MEN", True, (255, 255, 255))
