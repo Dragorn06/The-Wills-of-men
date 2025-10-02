@@ -1,6 +1,2 @@
 /venv
-/poetry.lock
-/room_descriptions.md
-/.replit
-/pyproject.toml
-/node_modules
+/__pycache__
