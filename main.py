@@ -13,17 +13,18 @@ import textwrap
 
 import pygame
 
-from src.scripts.actions import Noun, Verb, Misc_Button
-from src.scripts.constants import (BASE_FONT, CLOCK, DISPLAY, FANCY_FONT, WINHIEGHT,
+from scripts.player.actions import Noun, Verb, Misc_Button
+from scripts.constants import (BASE_FONT, CLOCK, DISPLAY, FANCY_FONT, WINHIEGHT,
                            WINWIDTH)
-from src.scripts.homescreen import Homescreen
+from scripts.homescreen import Homescreen
 
 # importing other parts of the game
-from src.scripts.inventory import Inventory
-from src.scripts.items import Item
-from src.scripts.npcs import Npc
-from src.scripts.rooms import Room
-from src.scripts.save_data import load, save
+from scripts.player.inventory import Inventory
+from scripts.items.ItemStructure import Item
+from scripts.npcs import Npc
+from scripts.rooms.RoomStructure import Room
+from scripts.rooms import *
+from scripts.save_data import load, save
 
 # initialising pygame
 pygame.init()
@@ -302,9 +303,9 @@ class Booter:
     @classmethod
     def boot(cls):
 
-        cls.create_items("src/GameObjects/items.json", cls.usages)
-        cls.create_npcs("src/GameObjects/npcs.json", cls.items)
-        cls.create_rooms("src/GameObjects/rooms.json", cls.items, cls.npcs)
+        cls.create_items("GameObjects/items.json", cls.usages)
+        cls.create_npcs("GameObjects/npcs.json", cls.items)
+        cls.create_rooms("GameObjects/rooms.json", cls.items, cls.npcs)
 
         # print([i.data() for i in cls.rooms])
         Main.current_room = cls.rooms[0]

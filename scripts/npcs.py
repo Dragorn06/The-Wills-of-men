@@ -2,7 +2,7 @@
 structure of a Non player character who can be talked to 
 """
 
-from .inventory import Inventory
+from .player.inventory import Inventory
 
 
 class Npc():
