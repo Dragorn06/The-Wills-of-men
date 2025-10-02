@@ -7,25 +7,11 @@ by Dagorn06
 import gc
 import sys
 import json
-import os
 # general imports
 import textwrap
 
 import pygame
-
-from scripts.player.actions import Noun, Verb, Misc_Button
-from scripts.constants import (BASE_FONT, CLOCK, DISPLAY, FANCY_FONT, WINHIEGHT,
-                           WINWIDTH)
-from scripts.homescreen import Homescreen
-
-# importing other parts of the game
-from scripts.player.inventory import Inventory
-from scripts.items.ItemStructure import Item
-from scripts.npcs import Npc
-from scripts.rooms.RoomStructure import Room
-from scripts.rooms import *
-from scripts.save_data import load, save
-
+import scripts
 # initialising pygame
 pygame.init()
 
@@ -37,11 +23,11 @@ def render_title():
     title_text = Main.current_room.name
 
     # Render the title text.
-    title_surface = FANCY_FONT.render(title_text, True, (255, 255, 255))
-    title_rect = title_surface.get_rect(center=(WINWIDTH // 2, 20))
+    title_surface = scripts.FANCY_FONT.render(title_text, True, (255, 255, 255))
+    title_rect = title_surface.get_rect(center=(scripts.Constants.WINWIDTH // 2, 20))
 
     # Display the title text.
-    DISPLAY.blit(title_surface, title_rect)
+    scripts.Constants.DISPLAY.blit(title_surface, title_rect)
 
 def render_description():
     """Render the current room's description."""
@@ -54,8 +40,8 @@ def render_description():
 
     # Render each line of the description text.
     for line in description_lines:
-        description_surface_line = BASE_FONT.render(line, False, (255, 255, 255))
-        DISPLAY.blit(description_surface_line, (12, description_y))
+        description_surface_line = scripts.Constants.BASE_FONT.render(line, False, (255, 255, 255))
+        scripts.Constants.DISPLAY.blit(description_surface_line, (12, description_y))
         description_y += 15
 
 def render_inventory():
@@ -65,12 +51,12 @@ def render_inventory():
     inventory_y = 50
 
     # Render each item in the player's inventory.
-    for item in Inventory.contents:
-        item_surface = BASE_FONT.render(item.name, False, (255, 255, 255))
-        DISPLAY.blit(item_surface, (WINWIDTH - (WINWIDTH / 3) + 2, inventory_y))
+    for item in scripts.Inventory.contents:
+        item_surface = scripts.BASE_FONT.render(item.name, False, (255, 255, 255))
+        scripts.DISPLAY.blit(item_surface, (scripts.WINWIDTH - (scripts.WINWIDTH / 3) + 2, inventory_y))
         inventory_y += 15
 
-def render_verbs(mouse: pygame.Vector2, verb_list: list[Verb]):
+def render_verbs(mouse: pygame.Vector2, verb_list: list[scripts.Verb]):
     """Render the verbs the player can use.
 
     Args:
@@ -85,21 +71,21 @@ def render_verbs(mouse: pygame.Vector2, verb_list: list[Verb]):
     verb_rows = [verb_list[x:x+3] for x in range(0, len(verb_list), 3)]
 
     # Set the initial verb position.
-    verb_x = WINWIDTH // 3
-    verb_y = WINHIEGHT - WINHIEGHT // 3
+    verb_x = scripts.WINWIDTH // 3
+    verb_y = scripts.WINHIEGHT - scripts.WINHIEGHT // 3
 
     # Render each verb row.
     for verb_row in verb_rows:
         for verb in verb_row:
             # Render the verb text.
-            verb_surface = FANCY_FONT.render(f" {verb.name} ", True, (255, 255, 255))
+            verb_surface = scripts.FANCY_FONT.render(f" {verb.name} ", True, (255, 255, 255))
 
             # Set the verb's rectangle.
             verb.rect = verb_surface.get_rect(center=(verb_x, verb_y))
 
             # Draw a border around the verb if it is clicked or hovered over.
             if verb.rect.collidepoint(mouse) or verb.clicked:
-                pygame.draw.rect(DISPLAY, (255, 255, 255), verb.rect, 2, border_radius=5)
+                pygame.draw.rect(scripts.DISPLAY, (255, 255, 255), verb.rect, 2, border_radius=5)
 
                 # Render the verb's noun list if there is only one clicked verb and it is clicked
                 if not verb.clicked and num_clicked == 1:
@@ -108,16 +94,16 @@ def render_verbs(mouse: pygame.Vector2, verb_list: list[Verb]):
                     render_nouns(verb, mouse)
 
             # Display the verb text.
-            DISPLAY.blit(verb_surface, verb.rect)
+            scripts.DISPLAY.blit(verb_surface, verb.rect)
 
             # Move the verb position down.
             verb_y += 50
 
         # Reset the verb position to the next row.
-        verb_y = WINHIEGHT - WINHIEGHT // 3
+        verb_y = scripts.WINHIEGHT - scripts.WINHIEGHT // 3
         verb_x += 120
 
-def render_nouns(verb: Verb, mouse: pygame.Vector2):
+def render_nouns(verb: scripts.Verb, mouse: pygame.Vector2):
     """Render the nouns for the given verb.
 
     Args:
@@ -126,28 +112,28 @@ def render_nouns(verb: Verb, mouse: pygame.Vector2):
     """
 
     # Set the initial noun position.
-    noun_x = WINWIDTH - WINWIDTH // 3
-    noun_y = WINHIEGHT - WINHIEGHT // 3
+    noun_x = scripts.WINWIDTH - scripts.WINWIDTH // 3
+    noun_y = scripts.WINHIEGHT - scripts.WINHIEGHT // 3
 
     # Render each noun.
     for noun in verb.nouns:
         # Render the noun text.
-        noun_surface = FANCY_FONT.render(f" {noun.name} ", True, (255, 255, 255))
+        noun_surface = scripts.FANCY_FONT.render(f" {noun.name} ", True, (255, 255, 255))
 
         # Set the noun's rectangle.
         noun.rect = noun_surface.get_rect(center=(noun_x, noun_y))
 
         # Draw a border around the noun if it is clicked or hovered over.
         if noun.rect.collidepoint(mouse) or noun.clicked:
-            pygame.draw.rect(DISPLAY, (255, 255, 255), noun.rect, 2, border_radius=5)
+            pygame.draw.rect(scripts.DISPLAY, (255, 255, 255), noun.rect, 2, border_radius=5)
 
         # Display the noun text.
-        DISPLAY.blit(noun_surface, noun.rect)
+        scripts.DISPLAY.blit(noun_surface, noun.rect)
 
         # Move the noun position down.
         noun_y += 50
 
-def render_misc_buttons(mouse: pygame.Vector2, button_list: list[Misc_Button]):
+def render_misc_buttons(mouse: pygame.Vector2, button_list: list[scripts.Misc_Button]):
     """Render the misc buttons.
 
     Args:
@@ -161,17 +147,17 @@ def render_misc_buttons(mouse: pygame.Vector2, button_list: list[Misc_Button]):
     # Render each misc button.
     for button in button_list:
         # Render the misc button text.
-        button_surface = FANCY_FONT.render(f"{button.name}", True, (255, 255, 255))
+        button_surface = scripts.FANCY_FONT.render(f"{button.name}", True, (255, 255, 255))
 
         # Set the misc button's rectangle.
-        button.rect = button_surface.get_rect(center=(WINWIDTH - (WINWIDTH // 10), 20 + misc_button_y_offset))
+        button.rect = button_surface.get_rect(center=(scripts.WINWIDTH - (scripts.WINWIDTH // 10), 20 + misc_button_y_offset))
         
         # draw a border if the mouse hovers over the button
         if button.rect.collidepoint(mouse):
-            pygame.draw.rect(DISPLAY, (255, 255, 255), button.rect, 2, border_radius=5)
+            pygame.draw.rect(scripts.DISPLAY, (255, 255, 255), button.rect, 2, border_radius=5)
 
         # blit the button
-        DISPLAY.blit(button_surface, button.rect)
+        scripts.DISPLAY.blit(button_surface, button.rect)
 
         # move the next button down
         misc_button_y_offset += 50
@@ -188,11 +174,11 @@ def render_event():
 
     # Render each line of the event text.
     for line in event_lines:
-        event_surface = BASE_FONT.render(line, False, (255, 255, 255))
+        event_surface = scripts.BASE_FONT.render(line, False, (255, 255, 255))
         event_rect = event_surface.get_rect(
-            center=(WINWIDTH // 2,
-                    WINHIEGHT - (WINHIEGHT // 2.4) + event_y_offset))
-        DISPLAY.blit(event_surface, event_rect)
+            center=(scripts.WINWIDTH // 2,
+                    scripts.WINHIEGHT - (scripts.WINHIEGHT // 2.4) + event_y_offset))
+        scripts.DISPLAY.blit(event_surface, event_rect)
         event_y_offset += 15
 
 def render_response_text():
@@ -202,10 +188,10 @@ def render_response_text():
     response_text = Main.responce
 
     # Render the response text.
-    response_surface = BASE_FONT.render(response_text, False, (255, 255, 255))
+    response_surface = scripts.BASE_FONT.render(response_text, False, (255, 255, 255))
 
     # Display the response text.
-    DISPLAY.blit(response_surface, (WINWIDTH // 48, WINHIEGHT - 57))
+    scripts.DISPLAY.blit(response_surface, (scripts.WINWIDTH // 48, scripts.WINHIEGHT - 57))
 
 # Item usages
 '''
@@ -217,7 +203,7 @@ second word - what it does
 def l1_light_forge():
     """Lights the forge in the Abandoned forge"""
     if Main.current_room.room_id == 2:
-        if Booter.items[0] in Inventory.contents and Booter.items[1] in Inventory.contents:
+        if Booter.items[0] in scripts.Inventory.contents and Booter.items[1] in scripts.Inventory.contents:
 
             Main.responce = "you light the forge with the torch and coal."
 
@@ -228,7 +214,7 @@ def l1_light_forge():
 
             Main.current_room.add_item(Booter.items[2])
 
-            Inventory.remove_item(Booter.items[1])
+            scripts.Inventory.remove_item(Booter.items[1])
 
             Main.assign_get_nouns()
             Main.assign_examine_use_nouns()
@@ -243,7 +229,7 @@ def explore_room():
 
         Main.current_room.hidden_exits = []
 
-        save(Main.current_room.room_id)
+        scripts.save(Main.current_room.room_id)
 
     
 def l1_open_door():
@@ -253,18 +239,18 @@ def l1_open_door():
 
             Main.responce = "you open the door"
             Main.current_room.locked_exits.remove("north")
-            Inventory.remove_item(Booter.items[2])
+            scripts.Inventory.remove_item(Booter.items[2])
 
 
 def l2_buy_sword():
     """buys the sword in the market"""
     if Main.current_room == Booter.rooms[7]:
-        if Booter.items[3] in Inventory.contents:
+        if Booter.items[3] in scripts.Inventory.contents:
 
             Main.responce = "you buy the sword"
             Main.event = "'Here the sword is yours!'"
-            Inventory.add_item(Booter.items[5])
-            Inventory.remove_item(Booter.items[3])
+            scripts.Inventory.add_item(Booter.items[5])
+            scripts.Inventory.remove_item(Booter.items[3])
 
             Main.current_room.description = Main.current_room.description.replace(
                 "There is a sword for sale at one of the stalls", '')
@@ -273,10 +259,10 @@ def l2_buy_sword():
 def l2_fight_bear():
     """Fight the bear using the sword and the scroll"""
     if Main.current_room == Booter.rooms[6]:
-        if Booter.items[5] in Inventory.contents and Booter.items[4] not in Inventory.contents:
+        if Booter.items[5] in scripts.Inventory.contents and Booter.items[4] not in scripts.Inventory.contents:
             Main.event = """You use your sword to take on the bear.
             You fight valiantly but are forced to retreat"""
-        elif Booter.items[5] in Inventory.contents and Booter.items[4] in Inventory.contents:
+        elif Booter.items[5] in scripts.Inventory.contents and Booter.items[4] in scripts.Inventory.contents:
             Main.event = """You use your sword and the magic scroll to scare the bear away!"""
 
             Main.current_room.description = Main.current_room.description.replace(
@@ -311,9 +297,9 @@ class Booter:
         Main.current_room = cls.rooms[0]
         render_title()
 
-        Homescreen.loop()
-        if Homescreen.donext == 'load':
-            Main.current_room = load()
+        scripts.Homescreen.loop()
+        if scripts.Homescreen.donext == 'load':
+            Main.current_room = scripts.load()
         else:
             pass
         Main.game_loop()
@@ -331,7 +317,7 @@ class Booter:
             json_data = json.load(f)
 
         for item_data in json_data:
-            item = Item(
+            item = scripts.Item(
             json_data[f"{item_data}"]["Name"],
             json_data[f"{item_data}"]["ID"],
             json_data[f"{item_data}"]["description"],
@@ -364,7 +350,7 @@ class Booter:
             json_data = json.load(f)
 
         for npc_data in json_data:
-            npc = Npc(
+            npc = scripts.Npc(
                 json_data[f"{npc_data}"]["Name"],
                 json_data[f"{npc_data}"]["NpcId"],
                 json_data[f"{npc_data}"]["Primary Dialogue"],
@@ -392,7 +378,7 @@ class Booter:
             json_data = json.load(f)
 
         for room_data in json_data:
-            room = Room(
+            room = scripts.Room(
             json_data[f"{room_data}"]["Name"],
             json_data[f"{room_data}"]["RoomId"],
             json_data[f"{room_data}"]["Description"],
@@ -460,13 +446,13 @@ class Main:
 
         while True:
 
-            DISPLAY.fill((0, 0, 0))
+            scripts.DISPLAY.fill((0, 0, 0))
 
             mouse = pygame.mouse.get_pos()
 
-            cls.verbs = [s for s in gc.get_objects() if isinstance(s, Verb)]
-            cls.nouns = [s for s in gc.get_objects() if isinstance(s, Noun)]
-            cls.misc_buttons = [b for b in gc.get_objects() if isinstance(b, Misc_Button)]
+            cls.verbs = [s for s in gc.get_objects() if isinstance(s, scripts.Verb)]
+            cls.nouns = [s for s in gc.get_objects() if isinstance(s, scripts.Noun)]
+            cls.misc_buttons = [b for b in gc.get_objects() if isinstance(b, scripts.Misc_Button)]
 
             for event in pygame.event.get():
 
@@ -517,7 +503,7 @@ class Main:
             pygame.display.flip()
 
             # Limit the framerate to 60 FPS.
-            CLOCK.tick(120)
+            scripts.CLOCK.tick(120)
 
     @classmethod
     def assign_get_nouns(cls):
@@ -526,7 +512,7 @@ class Main:
         get_nouns = []
         for item in cls.current_room.contents:
             if not item.hidden:
-                get_noun = Noun(f"{item.name}", [get])
+                get_noun = scripts.Noun(f"{item.name}", [get])
                 get_nouns.append(get_noun)
 
         get.nouns = get_nouns
@@ -537,8 +523,8 @@ class Main:
         """Assign nouns to the `examine` and `use` verbs."""
 
         examine_use_nouns = []
-        for item in Inventory.contents:
-            examine_use_noun = Noun(f"{item.name}")
+        for item in scripts.Inventory.contents:
+            examine_use_noun = scripts.Noun(f"{item.name}")
             examine_use_nouns.append(examine_use_noun)
 
         use.nouns = examine_use_nouns
@@ -554,14 +540,14 @@ class Main:
 
         talk_nouns = []
         for npc in cls.current_room.npcs:
-            talk_noun = Noun(f"{npc.name}", [talk])
+            talk_noun = scripts.Noun(f"{npc.name}", [talk])
             talk_nouns.append(talk_noun)
 
         talk.nouns = talk_nouns
 
 
     @classmethod
-    def update_nouns(cls, clicked_verb: Verb, clicked_noun: Noun):
+    def update_nouns(cls, clicked_verb: scripts.Verb, clicked_noun: scripts.Noun):
         """Update the nouns associated with the clicked verb.
 
         Args:
@@ -581,7 +567,7 @@ class Main:
                 noun.reset()
 
     @classmethod
-    def update_verbs(cls, clicked_verb: Verb):
+    def update_verbs(cls, clicked_verb: scripts.Verb):
         """Update the verbs associated with the clicked verb.
 
         Args:
@@ -604,7 +590,7 @@ class Main:
 
 
     @classmethod
-    def update_misc_button(cls, clicked_misc_button: Misc_Button):
+    def update_misc_button(cls, clicked_misc_button: scripts.Misc_Button):
         """Update the clicked misc button.
 
         Args:
@@ -641,7 +627,7 @@ class Main:
 
 
             # Save the player's current room.
-            save(cls.current_room.room_id)
+            scripts.save(cls.current_room.room_id)
             # Assign nouns to the `get`, `examine`, `use`, and `talk` verbs.
             cls.assign_get_nouns()
             cls.assign_examine_use_nouns()
@@ -666,7 +652,7 @@ class Main:
             if item == i.name and not i.hidden:
                     
                     # adds the item to the players inventory and removes it from the room
-                    Inventory.add_item(i)
+                    scripts.Inventory.add_item(i)
                     cls.current_room.remove_item(i)
 
                     cls.responce = f'you get the {item}'
@@ -676,7 +662,7 @@ class Main:
                     cls.assign_examine_use_nouns()
                     
                     # saves the game
-                    save(cls.current_room.room_id)
+                    scripts.save(cls.current_room.room_id)
 
 
     @classmethod
@@ -702,7 +688,7 @@ class Main:
             item_name: The name of the item to use.
         """
 
-        for item in Inventory.contents:
+        for item in scripts.Inventory.contents:
             if item_name in item.name:
                 if item.usage is not None:
                     for usage in item.usage:
@@ -716,7 +702,7 @@ class Main:
             item_name: The name of the item to examine.
         """
 
-        for item in Inventory.contents:
+        for item in scripts.Inventory.contents:
             if item_name in item.name:
                 cls.responce = item.examine_text
 
@@ -724,14 +710,14 @@ class Main:
     def save(cls):
         """Save the player's progress."""
 
-        save(cls.current_room.room_id)
+        scripts.save(cls.current_room.room_id)
         cls.responce = "You save."
 
     @classmethod
     def load(cls):
         """Load the player's progress."""
 
-        save_data.load()
+        scripts.load()
 
     @classmethod
     def quit(cls):
@@ -742,17 +728,17 @@ class Main:
 
 
 # creating nouns
-north = Noun("north")
-south = Noun("south")
-east = Noun("east")
-west = Noun("west")
+north = scripts.Noun("north")
+south = scripts.Noun("south")
+east = scripts.Noun("east")
+west = scripts.Noun("west")
 
 # creating verbs
-go = Verb("go", [north, south, east, west], Main.go_direction)
-get = Verb("get", [], Main.get_item)
-use = Verb("use", [], Main.use_item)
-examine = Verb("examine", [], Main.examine_item)
-talk = Verb("talk", [], Main.talk_to_npc)
+go = scripts.Verb("go", [north, south, east, west], Main.go_direction)
+get = scripts.Verb("get", [], Main.get_item)
+use = scripts.Verb("use", [], Main.use_item)
+examine = scripts.Verb("examine", [], Main.examine_item)
+talk = scripts.Verb("talk", [], Main.talk_to_npc)
 
 north.verbs = [go]
 south.verbs = [go]
@@ -760,9 +746,9 @@ east.verbs = [go]
 west.verbs = [go]
 
 # creating misc buttons
-save_button = Misc_Button("save", Main.save)
-load_button = Misc_Button("load", Main.load)
-quit_button = Misc_Button("quit", Main.quit)
+save_button = scripts.Misc_Button("save", Main.save)
+load_button = scripts.Misc_Button("load", Main.load)
+quit_button = scripts.Misc_Button("quit", Main.quit)
 
 if __name__ == "__main__":
     Booter.boot()

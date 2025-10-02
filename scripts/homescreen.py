@@ -4,7 +4,7 @@ This file acts almost as its own program functioning as a homescreen for the gam
 
 import sys
 import pygame
-from .constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY, BASE_FONT, FANCY_FONT, TITLE_FONT, FLAVOUR_TEXT_FONT
+from .Constants import WINWIDTH, WINHIEGHT, CLOCK, DISPLAY, BASE_FONT, FANCY_FONT, TITLE_FONT, FLAVOUR_TEXT_FONT
 
 
 class Homescreen:
