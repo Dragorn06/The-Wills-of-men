@@ -12,11 +12,11 @@ class Npc():
 
     # pylint: disable=too-many-arguments
     # need to refoactor to remove condition_item as an argument
-    def __init__(self, name, npc_id, condition_item, default_dialogue,
+    def __init__(self, name, npc_id, default_dialogue,
                  secondary_dialogue):
         self.name = name
         self.npc_id = npc_id
-        self.condition_item = condition_item
+        self.condition_item = None
         self.default_dialogue = default_dialogue
         self.secondary_dialogue = secondary_dialogue  # returned if a condition is met
 

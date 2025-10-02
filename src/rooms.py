@@ -15,7 +15,8 @@ class Room():
                  name,
                  room_id,
                  description,
-                 explore_text=' you find nothing of note'):
+                 explore_text=' you find nothing of note'
+                 ):
         self.name = name  # the name of the room, used as the title
         self.room_id = room_id
         self.description = description  # the description fo the room the player is shown
@@ -58,10 +59,15 @@ class Room():
         for item in self.contents:
             conts.append(item.item_id)
 
+        exts = {}
+        for i in self.exits:
+            exts[i] = int(self.exits[i])
+
         return {
             "Name": self.name,
             "Description": self.description,
             "Contents": conts,
+            "Exits": exts,
             "Hidden exits": self.hidden_exits,
-            "Locked exits": self.locked_exits
+            "Locked exits": self.locked_exits,
         }

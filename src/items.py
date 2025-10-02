@@ -6,10 +6,11 @@ the basic structure of an item
 class Item():
     """a blueprint class for an item"""
 
-    def __init__(self, name, item_id, description):
+    def __init__(self, name, item_id, description, examine_text):
         self.name = name  # the name of the item
         self.item_id = item_id
         self.description = description
+        self.examine_text = examine_text
         self.usage = None  # the usage of the item
         self.hidden = False
 
@@ -21,7 +22,7 @@ class Item():
             "ID": self.item_id,
             "Is Hidden": self.hidden,
             "description": self.description,
-            "usage": self.usage,
+            # "usage": self.usage,
         }
 
     def data(self):

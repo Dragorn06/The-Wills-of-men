@@ -16,7 +16,7 @@ class Homescreen:
     donext = None
     input_text = ''.lower()
 
-    made_by = SMALL_FONT_1.render("made by Dragorn06", True, (255, 255, 255))
+    made_by = SMALL_FONT_1.render("made by Dragorn06", False, (255, 255, 255))
     prompt = SMALL_FONT_2.render(
         'Type "start" to begin and "load" to load a save. To quit type "quit".',
         True, (255, 255, 255))
@@ -60,7 +60,7 @@ class Homescreen:
             DISPLAY.blit(text_surface, (10, WINHIEGHT - 32))
 
             DISPLAY.blit(cls.title, cls.title_rect)
-            DISPLAY.blit(cls.made_by, cls.made_by_rect)
+            # DISPLAY.blit(cls.made_by, cls.made_by_rect)
             DISPLAY.blit(cls.prompt, cls.prompt_rect)
 
             pygame.display.flip()
